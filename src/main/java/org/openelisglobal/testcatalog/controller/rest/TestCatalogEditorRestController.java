@@ -615,6 +615,9 @@ public class TestCatalogEditorRestController {
         public Integer significantDigits;
         public String defaultResult;
         public Boolean allowMultipleReadings;
+        // Exactly one component per test is primary — the one mirrored to the
+        // legacy test columns. The service normalizes to a single primary.
+        public Boolean isPrimary;
         public List<InterpretationDto> interpretations = new ArrayList<>();
         public List<OptionDto> options = new ArrayList<>();
     }
@@ -670,6 +673,7 @@ public class TestCatalogEditorRestController {
             e.setSignificantDigits(c.significantDigits);
             e.setDefaultResult(c.defaultResult);
             e.setAllowMultipleReadings(Boolean.TRUE.equals(c.allowMultipleReadings));
+            e.setIsPrimary(Boolean.TRUE.equals(c.isPrimary));
             desired.add(e);
 
             List<TestResultInterpretation> interps = new ArrayList<>();
@@ -696,7 +700,10 @@ public class TestCatalogEditorRestController {
                 tr.setValue(o.value);
                 tr.setSortOrder(o.sortOrder != null ? String.valueOf(o.sortOrder) : null);
                 tr.setIsNormal(Boolean.TRUE.equals(o.normal));
-                tr.setTestResultType(o.resultType != null ? o.resultType : c.resultType);
+                // Option rows must carry the component's type ('D'/'M'/'C') —
+                // result entry derives the widget from them, so a stale
+                // per-option type would render the wrong control.
+                tr.setTestResultType(c.resultType != null ? c.resultType : o.resultType);
                 opts.add(tr);
             }
             optionsByCode.put(c.code, opts);
@@ -730,6 +737,7 @@ public class TestCatalogEditorRestController {
             dto.significantDigits = c.getSignificantDigits();
             dto.defaultResult = c.getDefaultResult();
             dto.allowMultipleReadings = c.getAllowMultipleReadings();
+            dto.isPrimary = c.getIsPrimary();
             for (TestResultInterpretation i : interpretationService.getActiveByComponentId(c.getId())) {
                 InterpretationDto idto = new InterpretationDto();
                 idto.id = i.getId();
