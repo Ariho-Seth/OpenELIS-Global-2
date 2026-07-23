@@ -13,56 +13,53 @@
  */
 package org.openelisglobal.action.valueholder;
 
+import com.beust.jcommander.Parameters;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 import org.openelisglobal.common.util.StringUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
+import org.hibernate.annotations.Parameter;
 
+@Setter
+@Getter
+@Entity
+@Table(name="ACTION")
 public class Action extends BaseObject<String> {
 
-    private String code;
-
+    @Id
+    @GeneratedValue(generator = "string-sequence-generator")
+    @GenericGenerator(
+            name="string-sequence-generator",
+            strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator",
+            parameters = {
+                    @Parameter(name = "sequence_name", value = "action_seq")
+            }
+    )
+    @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
+    @Column(name = "CODE", precision = 10, nullable = false)
+    private String code;
+
+    @Column(name = "DESCRIPTION", precision = 256, nullable = false)
     private String description;
 
+    @Column(name = "TYPE", precision = 10, nullable = false)
     private String type;
 
+    @Version
+    @Column(name = "LASTUPDATED")
+    private java.sql.Timestamp lastupdated;
+
     // (concatenate action code name/desc)
+    // Marked as transient because it's a computed property, not a database column
+    @Transient
     private String actionDisplayValue;
 
     public Action() {
         super();
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getActionDisplayValue() {
