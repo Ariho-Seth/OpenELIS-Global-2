@@ -13,30 +13,24 @@
  */
 package org.openelisglobal.action.valueholder;
 
-import com.beust.jcommander.Parameters;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.openelisglobal.common.util.StringUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
-import org.hibernate.annotations.Parameter;
 
 @Setter
 @Getter
 @Entity
-@Table(name="ACTION")
+@Table(name = "ACTION")
 public class Action extends BaseObject<String> {
 
     @Id
     @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(
-            name="string-sequence-generator",
-            strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator",
-            parameters = {
-                    @Parameter(name = "sequence_name", value = "action_seq")
-            }
-    )
+    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+            @Parameter(name = "sequence_name", value = "action_seq") })
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
