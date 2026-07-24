@@ -14,7 +14,6 @@
 package org.openelisglobal.analysisqaevent.valueholder;
 
 import jakarta.persistence.*;
-
 import java.sql.Date;
 import lombok.Getter;
 import lombok.Setter;

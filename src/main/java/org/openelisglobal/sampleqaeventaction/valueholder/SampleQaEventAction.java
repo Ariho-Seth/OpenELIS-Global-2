@@ -14,7 +14,6 @@
 package org.openelisglobal.sampleqaeventaction.valueholder;
 
 import jakarta.persistence.*;
-
 import java.sql.Date;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +26,6 @@ import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
-import org.openelisglobal.common.valueholder.ValueHolder;
 import org.openelisglobal.sampleqaevent.valueholder.SampleQaEvent;
 import org.openelisglobal.systemuser.valueholder.SystemUser;
 
