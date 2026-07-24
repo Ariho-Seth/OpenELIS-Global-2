@@ -145,17 +145,16 @@
         <class>org.openelisglobal.labelpreset.valueholder.OrderLabelRequest</class>
 
         <!-- Action entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/Action.java</class>
+        <class>org.openelisglobal.action.valueholder.Action</class>
 
         <!-- SampleQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/SampleQaEventAction.java</class>
+        <class>org.openelisglobal.action.valueholder.SampleQaEventAction</class>
 
         <!-- AnalysisQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/AnalysisQaEventAction.java</class>
+        <class>org.openelisglobal.action.valueholder.AnalysisQaEventAction</class>
 
-        <!-- SampleQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/sampleqaeventaction/valueholder/SampleQaEventAction.javaa</class>
-
+        <!-- AnalysisQaEvent entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.action.valueholder.AnalysisQaEvent</class>
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />

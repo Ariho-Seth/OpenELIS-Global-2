@@ -85,7 +85,7 @@
         <class>org.openelisglobal.coldstorage.valueholder.FreezerReading</class>
         <class>org.openelisglobal.coldstorage.valueholder.ThresholdProfile</class>
         <class>org.openelisglobal.coldstorage.valueholder.FreezerThresholdProfile</class>
-
+        ic
         <!-- Alert entities -->
         <class>org.openelisglobal.alert.valueholder.Alert</class>
         <class>org.openelisglobal.coldstorage.valueholder.CorrectiveAction</class>
@@ -197,16 +197,16 @@
         <class>org.openelisglobal.labelpreset.valueholder.OrderLabelRequest</class>
 
         <!-- Action entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/Action.java</class>
+        <class>org.openelisglobal.action.valueholder.Action</class>
 
         <!-- SampleQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/SampleQaEventAction.java</class>
+        <class>org.openelisglobal.action.valueholder.SampleQaEventAction</class>
 
         <!-- AnalysisQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/AnalysisQaEventAction.java</class>
+        <class>org.openelisglobal.action.valueholder.AnalysisQaEventAction</class>
 
         <!-- AnalysisQaEvent entity (migrated from HBM to JPA annotations) -->
-        <class>org/openelisglobal/action/valueholder/AnalysisQaEvent.java</class>
+        <class>org.openelisglobal.action.valueholder.AnalysisQaEvent</class>
 
         <properties>
             <property name="hibernate.ejb.cfgfile"
