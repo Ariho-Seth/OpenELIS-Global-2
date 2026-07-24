@@ -46,7 +46,6 @@ import org.openelisglobal.systemuser.valueholder.SystemUser;
 @Setter
 @Entity
 @Table(name = "SAMPLE_QAEVENT_ACTION")
-
 public class SampleQaEventAction extends BaseObject<String> {
 
     @Id

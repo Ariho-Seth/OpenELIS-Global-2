@@ -205,6 +205,9 @@
         <!-- AnalysisQaEventAction entity (migrated from HBM to JPA annotations) -->
         <class>org/openelisglobal/action/valueholder/AnalysisQaEventAction.java</class>
 
+        <!-- AnalysisQaEvent entity (migrated from HBM to JPA annotations) -->
+        <class>org/openelisglobal/action/valueholder/AnalysisQaEvent.java</class>
+
         <properties>
             <property name="hibernate.ejb.cfgfile"
                 value="hibernate/test-hibernate.cfg.xml" />
