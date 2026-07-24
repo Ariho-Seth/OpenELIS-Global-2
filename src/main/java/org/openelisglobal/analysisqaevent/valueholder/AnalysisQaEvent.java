@@ -21,7 +21,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import java.sql.Date;
 import lombok.Getter;
@@ -33,8 +32,6 @@ import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
-import org.openelisglobal.common.valueholder.ValueHolder;
-import org.openelisglobal.common.valueholder.ValueHolderInterface;
 import org.openelisglobal.qaevent.valueholder.QaEvent;
 
 @Getter
@@ -51,21 +48,15 @@ public class AnalysisQaEvent extends BaseObject<String> {
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
-    @Transient
-    private String qaEventId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "QA_EVENT_ID")
+    private QaEvent qaEvent;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "QA_EVENT_ID", nullable = false)
-    private ValueHolderInterface qaEvent;
+    @JoinColumn(name = "ANALYSIS_ID")
+    private Analysis analysis;
 
-    @Transient
-    private String analysisId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ANALYSIS_ID", nullable = false)
-    private ValueHolderInterface analysis;
-
-    @Column(name = "CREATED_DATE", length = 7, nullable = false)
+    @Column(name = "CREATED_DATE", length = 7)
     private Date completedDate;
 
     private String completedDateForDisplay;
@@ -78,49 +69,21 @@ public class AnalysisQaEvent extends BaseObject<String> {
 
     public AnalysisQaEvent() {
         super();
-        this.analysis = new ValueHolder();
-        this.qaEvent = new ValueHolder();
     }
 
-    // ANALYSIS
-    public Analysis getAnalysis() {
-        return (Analysis) this.analysis.getValue();
-    }
-
-    public void setAnalysis(ValueHolderInterface analysis) {
-        this.analysis = analysis;
-    }
-
-    public void setAnalysis(Analysis analysis) {
-        this.analysis.setValue(analysis);
-    }
-
-    protected ValueHolderInterface getAnalysisHolder() {
+    protected Analysis getAnalysisHolder() {
         return this.analysis;
     }
 
-    protected void setAnalysisHolder(ValueHolderInterface analysis) {
+    protected void setAnalysisHolder(Analysis analysis) {
         this.analysis = analysis;
     }
 
-    // QA_EVENT
-    public QaEvent getQaEvent() {
-        return (QaEvent) this.qaEvent.getValue();
-    }
-
-    public void setQaEvent(ValueHolderInterface qaEvent) {
-        this.qaEvent = qaEvent;
-    }
-
-    public void setQaEvent(QaEvent qaEvent) {
-        this.qaEvent.setValue(qaEvent);
-    }
-
-    protected ValueHolderInterface getQaEventHolder() {
+    protected QaEvent getQaEventHolder() {
         return this.qaEvent;
     }
 
-    protected void setQaEventHolder(ValueHolderInterface qaEvent) {
+    protected void setQaEventHolder(QaEvent qaEvent) {
         this.qaEvent = qaEvent;
     }
 

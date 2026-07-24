@@ -34,7 +34,6 @@ import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
 import org.openelisglobal.common.valueholder.ValueHolder;
-import org.openelisglobal.common.valueholder.ValueHolderInterface;
 import org.openelisglobal.sampleqaevent.valueholder.SampleQaEvent;
 import org.openelisglobal.systemuser.valueholder.SystemUser;
 
@@ -55,19 +54,14 @@ public class SampleQaEventAction extends BaseObject<String> {
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
-    @Transient
-    private String sampleQaEventId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SAMPLE_QAEVENT_ID", nullable = false)
-    private ValueHolderInterface sampleQaEvent;
-
-    @Transient
-    private String actionId;
+    private SampleQaEvent sampleQaEvent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ACTION_ID", nullable = false)
-    private ValueHolderInterface action;
+    private Action action;
 
     @Column(name = "CREATED_DATE", length = 7, nullable = false)
     private Date createdDate;
@@ -88,49 +82,21 @@ public class SampleQaEventAction extends BaseObject<String> {
 
     public SampleQaEventAction() {
         super();
-        this.action = new ValueHolder();
-        this.sampleQaEvent = new ValueHolder();
     }
 
-    // Action
-    public Action getAction() {
-        return (Action) this.action.getValue();
-    }
-
-    public void setAction(ValueHolderInterface action) {
-        this.action = action;
-    }
-
-    public void setAction(Action action) {
-        this.action.setValue(action);
-    }
-
-    protected ValueHolderInterface getActionHolder() {
+    protected Action getActionHolder() {
         return this.action;
     }
 
-    protected void setActionHolder(ValueHolderInterface action) {
+    protected void setActionHolder(Action action) {
         this.action = action;
     }
 
-    // SAMPLE_QA_EVENT
-    public SampleQaEvent getSampleQaEvent() {
-        return (SampleQaEvent) this.sampleQaEvent.getValue();
-    }
-
-    public void setSampleQaEvent(ValueHolderInterface sampleQaEvent) {
-        this.sampleQaEvent = sampleQaEvent;
-    }
-
-    public void setSampleQaEvent(SampleQaEvent sampleQaEvent) {
-        this.sampleQaEvent.setValue(sampleQaEvent);
-    }
-
-    protected ValueHolderInterface getSampleQaEventHolder() {
+    protected SampleQaEvent getSampleQaEventHolder() {
         return this.sampleQaEvent;
     }
 
-    protected void setSampleQaEventHolder(ValueHolderInterface sampleQaEvent) {
+    protected void setSampleQaEventHolder(SampleQaEvent sampleQaEvent) {
         this.sampleQaEvent = sampleQaEvent;
     }
 

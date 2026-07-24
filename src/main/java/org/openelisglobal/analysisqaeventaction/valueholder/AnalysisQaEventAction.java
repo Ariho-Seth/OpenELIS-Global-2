@@ -34,8 +34,6 @@ import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
 import org.openelisglobal.common.util.DateUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
-import org.openelisglobal.common.valueholder.ValueHolder;
-import org.openelisglobal.common.valueholder.ValueHolderInterface;
 import org.openelisglobal.systemuser.valueholder.SystemUser;
 
 @Setter
@@ -51,19 +49,13 @@ public class AnalysisQaEventAction extends BaseObject<String> {
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
-    @Transient
-    private String analysisQaEventId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ANALYSIS_QAEVENT_ID", nullable = false)
-    private ValueHolderInterface analysisQaEvent;
-
-    @Transient
-    private String actionId;
+    private AnalysisQaEvent analysisQaEvent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ACTION_ID", nullable = false)
-    private ValueHolderInterface action;
+    private Action action;
 
     @Column(name = "CREATED_DATE", precision = 7, nullable = false)
     private Date createdDate;
@@ -84,49 +76,21 @@ public class AnalysisQaEventAction extends BaseObject<String> {
 
     public AnalysisQaEventAction() {
         super();
-        this.action = new ValueHolder();
-        this.analysisQaEvent = new ValueHolder();
     }
 
-    // Action
-    public Action getAction() {
-        return (Action) this.action.getValue();
-    }
-
-    public void setAction(ValueHolderInterface action) {
-        this.action = action;
-    }
-
-    public void setAction(Action action) {
-        this.action.setValue(action);
-    }
-
-    protected ValueHolderInterface getActionHolder() {
+    protected Action getActionHolder() {
         return this.action;
     }
 
-    protected void setActionHolder(ValueHolderInterface action) {
+    protected void setActionHolder(Action action) {
         this.action = action;
     }
 
-    // ANALYSIS_QA_EVENT
-    public AnalysisQaEvent getAnalysisQaEvent() {
-        return (AnalysisQaEvent) this.analysisQaEvent.getValue();
-    }
-
-    public void setAnalysisQaEvent(ValueHolderInterface analysisQaEvent) {
-        this.analysisQaEvent = analysisQaEvent;
-    }
-
-    public void setAnalysisQaEvent(AnalysisQaEvent analysisQaEvent) {
-        this.analysisQaEvent.setValue(analysisQaEvent);
-    }
-
-    protected ValueHolderInterface getAnalysisQaEventHolder() {
+    protected AnalysisQaEvent getAnalysisQaEventHolder() {
         return this.analysisQaEvent;
     }
 
-    protected void setAnalysisQaEventHolder(ValueHolderInterface analysisQaEvent) {
+    protected void setAnalysisQaEventHolder(AnalysisQaEvent analysisQaEvent) {
         this.analysisQaEvent = analysisQaEvent;
     }
 

@@ -148,13 +148,14 @@
         <class>org.openelisglobal.action.valueholder.Action</class>
 
         <!-- SampleQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org.openelisglobal.action.valueholder.SampleQaEventAction</class>
+        <class>org.openelisglobal.sampleqaeventaction.valueholder.SampleQaEventAction</class>
 
         <!-- AnalysisQaEventAction entity (migrated from HBM to JPA annotations) -->
-        <class>org.openelisglobal.action.valueholder.AnalysisQaEventAction</class>
+        <class>org.openelisglobal.analysisqaeventaction.valueholder.AnalysisQaEventAction</class>
 
         <!-- AnalysisQaEvent entity (migrated from HBM to JPA annotations) -->
-        <class>org.openelisglobal.action.valueholder.AnalysisQaEvent</class>
+        <class>org.openelisglobal.analysisqaevent.valueholder.AnalysisQaEvent</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />
