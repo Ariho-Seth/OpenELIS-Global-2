@@ -29,8 +29,8 @@
 
         <mapping resource="hibernate/hbm/Analysis.hbm.xml" />
         <mapping resource="hibernate/hbm/AnalysisQaEvent.hbm.xml" />
-        <mapping
-            resource="hibernate/hbm/AnalysisQaEventAction.hbm.xml" />
+        <!-- <mapping -->
+        <!-- resource="hibernate/hbm/AnalysisQaEventAction.hbm.xml" /> -->
         <mapping resource="hibernate/hbm/Analyte.hbm.xml" />
         <mapping resource="hibernate/hbm/History.hbm.xml" />
         <mapping resource="hibernate/hbm/CityStateZip.hbm.xml" />
@@ -66,7 +66,7 @@
         <mapping resource="hibernate/hbm/SampleOrganization.hbm.xml" />
         <mapping resource="hibernate/hbm/SampleProject.hbm.xml" />
         <mapping resource="hibernate/hbm/SampleQaEvent.hbm.xml" />
-        <mapping resource="hibernate/hbm/SampleQaEventAction.hbm.xml" />
+        <!-- <mapping resource="hibernate/hbm/SampleQaEventAction.hbm.xml" /> -->
         <mapping resource="hibernate/hbm/SampleTracking.hbm.xml" />
         <mapping resource="hibernate/hbm/Scriptlet.hbm.xml" />
         <mapping resource="hibernate/hbm/SourceOfSample.hbm.xml" />

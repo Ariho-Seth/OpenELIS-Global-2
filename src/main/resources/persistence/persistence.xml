@@ -147,6 +147,12 @@
         <!-- Action entity (migrated from HBM to JPA annotations) -->
         <class>org/openelisglobal/action/valueholder/Action.java</class>
 
+        <!-- SampleQaEventAction entity (migrated from HBM to JPA annotations) -->
+        <class>org/openelisglobal/action/valueholder/SampleQaEventAction.java</class>
+
+        <!-- AnalysisQaEventAction entity (migrated from HBM to JPA annotations) -->
+        <class>org/openelisglobal/action/valueholder/AnalysisQaEventAction.java</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />

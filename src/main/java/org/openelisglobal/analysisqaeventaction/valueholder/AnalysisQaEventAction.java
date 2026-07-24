@@ -13,7 +13,21 @@
  */
 package org.openelisglobal.analysisqaeventaction.valueholder;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import java.sql.Date;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.openelisglobal.action.valueholder.Action;
 import org.openelisglobal.analysisqaevent.valueholder.AnalysisQaEvent;
 import org.openelisglobal.common.util.ConfigurationProperties;
@@ -24,39 +38,54 @@ import org.openelisglobal.common.valueholder.ValueHolder;
 import org.openelisglobal.common.valueholder.ValueHolderInterface;
 import org.openelisglobal.systemuser.valueholder.SystemUser;
 
+@Setter
+@Getter
+@Entity
+@Table(name = "ANALYSIS_QAEVENT_ACTION")
 public class AnalysisQaEventAction extends BaseObject<String> {
 
+    @Id
+    @GeneratedValue(generator = "string-sequence-generator")
+    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+            @Parameter(name = "sequence_name", value = "analysis_qaevent_action_seq") })
+    @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
+    @Transient
     private String analysisQaEventId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ANALYSIS_QAEVENT_ID", nullable = false)
     private ValueHolderInterface analysisQaEvent;
 
+    @Transient
     private String actionId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ACTION_ID", nullable = false)
     private ValueHolderInterface action;
 
+    @Column(name = "CREATED_DATE", precision = 7, nullable = false)
     private Date createdDate;
 
     private String createdDateForDisplay;
 
     // bugzilla 2481
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "SYS_USER_ID")
     private SystemUser systemUser;
 
+    @Transient
     private String systemUserId;
+
+    @Version
+    @Column(name = "LASTUPDATED")
+    private java.sql.Timestamp lastupdated;
 
     public AnalysisQaEventAction() {
         super();
         this.action = new ValueHolder();
         this.analysisQaEvent = new ValueHolder();
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
     }
 
     // Action
@@ -101,25 +130,9 @@ public class AnalysisQaEventAction extends BaseObject<String> {
         this.analysisQaEvent = analysisQaEvent;
     }
 
-    public String getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(String actionId) {
-        this.actionId = actionId;
-    }
-
-    public Date getCreatedDate() {
-        return createdDate;
-    }
-
     public void setCreatedDate(Date createdDate) {
         this.createdDate = createdDate;
         this.createdDateForDisplay = DateUtil.convertSqlDateToStringDate(createdDate);
-    }
-
-    public String getCreatedDateForDisplay() {
-        return this.createdDateForDisplay;
     }
 
     public void setCreatedDateForDisplay(String createdDateForDisplay) {
@@ -127,29 +140,5 @@ public class AnalysisQaEventAction extends BaseObject<String> {
         // also update the java.sql.Date
         String locale = ConfigurationProperties.getInstance().getPropertyValue(Property.DEFAULT_LANG_LOCALE);
         this.createdDate = DateUtil.convertStringDateToSqlDate(createdDateForDisplay, locale);
-    }
-
-    public String getAnalysisQaEventId() {
-        return analysisQaEventId;
-    }
-
-    public void setAnalysisQaEventId(String analysisQaEventId) {
-        this.analysisQaEventId = analysisQaEventId;
-    }
-
-    public void setSystemUser(SystemUser systemUser) {
-        this.systemUser = systemUser;
-    }
-
-    public SystemUser getSystemUser() {
-        return this.systemUser;
-    }
-
-    public String getSystemUserId() {
-        return systemUserId;
-    }
-
-    public void setSystemUserId(String systemUserId) {
-        this.systemUserId = systemUserId;
     }
 }
