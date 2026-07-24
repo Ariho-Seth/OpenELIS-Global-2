@@ -13,17 +13,12 @@
  */
 package org.openelisglobal.action.valueholder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.openelisglobal.common.util.StringUtil;
 import org.openelisglobal.common.valueholder.BaseObject;
 
@@ -31,12 +26,14 @@ import org.openelisglobal.common.valueholder.BaseObject;
 @Getter
 @Entity
 @Table(name = "ACTION")
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class Action extends BaseObject<String> {
 
     @Id
     @GeneratedValue(generator = "string-sequence-generator")
     @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "action_seq") })
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
@@ -48,10 +45,6 @@ public class Action extends BaseObject<String> {
 
     @Column(name = "TYPE", precision = 10, nullable = false)
     private String type;
-
-    @Version
-    @Column(name = "LASTUPDATED")
-    private java.sql.Timestamp lastupdated;
 
     // (concatenate action code name/desc)
     // Marked as transient because it's a computed property, not a database column

@@ -13,20 +13,14 @@
  */
 package org.openelisglobal.analysisqaevent.valueholder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
+
 import java.sql.Date;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.openelisglobal.analysis.valueholder.Analysis;
 import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
@@ -39,12 +33,14 @@ import org.openelisglobal.qaevent.valueholder.QaEvent;
 @DynamicUpdate
 @Entity
 @Table(name = "ANALYSIS_QAEVENT")
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class AnalysisQaEvent extends BaseObject<String> {
 
     @Id
     @GeneratedValue(generator = "string-sequence-generator")
     @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @org.hibernate.annotations.Parameter(name = "sequence_name", value = "analysis_qaevent_seq") })
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
@@ -56,16 +52,12 @@ public class AnalysisQaEvent extends BaseObject<String> {
     @JoinColumn(name = "ANALYSIS_ID")
     private Analysis analysis;
 
-    @Column(name = "CREATED_DATE", length = 7)
+    @Column(name = "COMPLETED_DATE", length = 7)
     private Date completedDate;
 
     private String completedDateForDisplay;
 
     private String analysisQaEventDisplayValue;
-
-    @Version
-    @Column(name = "LASTUPDATED")
-    private java.sql.Timestamp lastupdated;
 
     public AnalysisQaEvent() {
         super();

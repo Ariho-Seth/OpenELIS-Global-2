@@ -13,21 +13,15 @@
  */
 package org.openelisglobal.sampleqaeventaction.valueholder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
+
 import java.sql.Date;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.openelisglobal.action.valueholder.Action;
 import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.common.util.ConfigurationProperties.Property;
@@ -43,17 +37,19 @@ import org.openelisglobal.systemuser.valueholder.SystemUser;
 
 @Getter
 @Setter
+@DynamicUpdate
 @Entity
 @Table(name = "SAMPLE_QAEVENT_ACTION")
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class SampleQaEventAction extends BaseObject<String> {
 
     @Id
     @GeneratedValue(generator = "string-sequence-generator")
     @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "sample_qaevent_action_seq") })
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SAMPLE_QAEVENT_ID", nullable = false)
@@ -75,10 +71,6 @@ public class SampleQaEventAction extends BaseObject<String> {
 
     @Transient
     private String systemUserId;
-
-    @Version
-    @Column(name = "LASTUPDATED")
-    private java.sql.Timestamp lastupdated;
 
     public SampleQaEventAction() {
         super();
