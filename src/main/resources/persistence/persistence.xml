@@ -154,6 +154,9 @@
         <class>org.openelisglobal.address.valueholder.AddressPart</class>
         <class>org.openelisglobal.address.valueholder.OrganizationAddress</class>
 
+        <!-- History entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.audittrail.valueholder.History</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />
