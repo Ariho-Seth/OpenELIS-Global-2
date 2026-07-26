@@ -116,7 +116,6 @@
             resource="hibernate/hbm/OrganizationHL7Schema.hbm.xml" />
         <mapping resource="hibernate/hbm/TestCode.hbm.xml" />
         <mapping resource="hibernate/hbm/RequesterType.hbm.xml" />
-        <mapping resource="hibernate/hbm/AddressPart.hbm.xml" />
         <mapping resource="hibernate/hbm/OrganizationAddress.hbm.xml" />
         <mapping resource="hibernate/hbm/PersonAddress.hbm.xml" />
         <mapping resource="hibernate/hbm/OrganizationContact.hbm.xml" />

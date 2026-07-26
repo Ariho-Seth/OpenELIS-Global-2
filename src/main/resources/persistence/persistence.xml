@@ -150,6 +150,9 @@
         <!-- County entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.county.valueholder.County</class>
 
+        <!-- Address entities (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.address.valueholder.AddressPart</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />
