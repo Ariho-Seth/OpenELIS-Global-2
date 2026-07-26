@@ -205,6 +205,7 @@
 
         <!-- Address entities (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.address.valueholder.AddressPart</class>
+        <class>org.openelisglobal.address.valueholder.OrganizationAddress</class>
 
         <properties>
             <property name="hibernate.ejb.cfgfile"

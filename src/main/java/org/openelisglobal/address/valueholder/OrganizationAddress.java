@@ -13,16 +13,32 @@
  */
 package org.openelisglobal.address.valueholder;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.validator.GenericValidator;
+import org.hibernate.annotations.DynamicUpdate;
 import org.openelisglobal.common.valueholder.BaseObject;
 
+@Setter
+@Getter
+@DynamicUpdate
+@Entity
+@Table(name = "organization_address")
 public class OrganizationAddress extends BaseObject<AddressPK> {
 
     private static final long serialVersionUID = 1L;
 
+    @EmbeddedId
     private AddressPK compoundId = new AddressPK();
+
+    @Column(name = "type")
     private String type;
+
+    @Column(name = "value")
     private String value;
+
+    @Transient
     private String uniqueIdentifyer;
 
     public AddressPK getCompoundId() {
