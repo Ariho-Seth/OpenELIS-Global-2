@@ -33,7 +33,7 @@
         <!-- resource="hibernate/hbm/AnalysisQaEventAction.hbm.xml" /> -->
         <mapping resource="hibernate/hbm/Analyte.hbm.xml" />
         <mapping resource="hibernate/hbm/History.hbm.xml" />
-        <mapping resource="hibernate/hbm/CityStateZip.hbm.xml" />
+        <!-- <mapping resource="hibernate/hbm/CityStateZip.hbm.xml" /> -->
         <mapping resource="hibernate/hbm/CityView.hbm.xml" />
         <mapping resource="hibernate/hbm/StateView.hbm.xml" />
         <mapping resource="hibernate/hbm/County.hbm.xml" />

@@ -156,6 +156,9 @@
         <!-- AnalysisQaEvent entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.analysisqaevent.valueholder.AnalysisQaEvent</class>
 
+        <!-- CityStateZip entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.citystatezip.valueholder.CityStateZip</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />

@@ -208,6 +208,9 @@
         <!-- AnalysisQaEvent entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.analysisqaevent.valueholder.AnalysisQaEvent</class>
 
+        <!-- CityStateZip entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.citystatezip.valueholder.CityStateZip</class>
+
         <properties>
             <property name="hibernate.ejb.cfgfile"
                 value="hibernate/test-hibernate.cfg.xml" />
