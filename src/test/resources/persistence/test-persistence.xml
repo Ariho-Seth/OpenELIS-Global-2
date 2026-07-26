@@ -197,8 +197,11 @@
         <class>org.openelisglobal.labelpreset.valueholder.TestLabelPresetLink</class>
         <class>org.openelisglobal.labelpreset.valueholder.OrderLabelRequest</class>
 
-        <!-- Dictionary entities (migrated from HBM to JPA annotations) -->
+        <!-- Label entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.label.valueholder.Label</class>
+
+        <!-- County entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.county.valueholder.County</class>
 
         <properties>
             <property name="hibernate.ejb.cfgfile"
