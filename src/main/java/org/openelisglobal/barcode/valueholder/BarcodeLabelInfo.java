@@ -1,5 +1,12 @@
 package org.openelisglobal.barcode.valueholder;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
 import org.openelisglobal.common.valueholder.BaseObject;
 
 /**
@@ -7,15 +14,33 @@ import org.openelisglobal.common.valueholder.BaseObject;
  *
  * @author Caleb
  */
+@Setter
+@Getter
+@DynamicUpdate
+@Entity
+@Table(name = "barcode_label_info")
+@AttributeOverride(name = "lastupdated", column = @Column(name = "lastupdated"))
 public class BarcodeLabelInfo extends BaseObject<String> {
 
     private static final long serialVersionUID = 1L;
 
     // PK
+    @Id
+    @GeneratedValue(generator = "string-sequence-generator")
+    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+            @Parameter(name = "sequence_name", value = "barcode_label_info_seq") })
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
     // Other values to persist
+
+    @Column(name = "numprinted", nullable = false)
     private int numPrinted;
+
+    @Column(name = "code", nullable = false)
     private String code;
+
+    @Column(name = "type", nullable = true)
     private String type;
 
     public BarcodeLabelInfo() {
@@ -69,27 +94,4 @@ public class BarcodeLabelInfo extends BaseObject<String> {
         this.id = id;
     }
 
-    public int getNumPrinted() {
-        return numPrinted;
-    }
-
-    public void setNumPrinted(int numPrinted) {
-        this.numPrinted = numPrinted;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 }
