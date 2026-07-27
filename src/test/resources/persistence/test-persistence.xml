@@ -207,9 +207,6 @@
         <class>org.openelisglobal.address.valueholder.AddressPart</class>
         <class>org.openelisglobal.address.valueholder.OrganizationAddress</class>
 
-        <!-- History entity (migrated from HBM to JPA annotations) -->
-        <class>org.openelisglobal.audittrail.valueholder.History</class>
-
         <properties>
             <property name="hibernate.ejb.cfgfile"
                 value="hibernate/test-hibernate.cfg.xml" />

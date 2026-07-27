@@ -13,57 +13,21 @@
  */
 package org.openelisglobal.audittrail.valueholder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import java.sql.Timestamp;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
 import org.openelisglobal.common.valueholder.BaseObject;
 
 /**
  * @author Hung Nguyen
  * @date created 09/12/2006
  */
-
-@Getter
-@Setter
-@Entity
-@Table(name = "history")
 public class History extends BaseObject<String> {
 
-    @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
-            @Parameter(name = "sequence_name", value = "history_seq") })
-    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
-    @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
-
-    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
-    @Column(name = "reference_id", precision = 22, scale = 0)
     private String referenceId;
-
-    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
-    @Column(name = "reference_table", precision = 22, scale = 0)
     private String referenceTable;
-
-    @Column(name = "timestamp", precision = 7, nullable = false)
     private Timestamp timestamp;
-
-    @Column(name = "activity", precision = 1, nullable = false)
     private String activity;
-
-    @Column(name = "changes", nullable = true)
     private byte[] changes;
-
-    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
-    @Column(name = "sys_user_id", precision = 22, scale = 0)
     private String sys_user_id;
 
     @Override
@@ -84,5 +48,45 @@ public class History extends BaseObject<String> {
     @Override
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+    }
+
+    public String getReferenceTable() {
+        return referenceTable;
+    }
+
+    public void setReferenceTable(String referenceTable) {
+        this.referenceTable = referenceTable;
+    }
+
+    public Timestamp getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Timestamp timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getActivity() {
+        return activity;
+    }
+
+    public void setActivity(String activity) {
+        this.activity = activity;
+    }
+
+    public byte[] getChanges() {
+        return changes;
+    }
+
+    public void setChanges(byte[] changes) {
+        this.changes = changes;
     }
 }
