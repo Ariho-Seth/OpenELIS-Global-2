@@ -39,7 +39,6 @@
         <mapping resource="hibernate/hbm/StateView.hbm.xml" />
         <mapping resource="hibernate/hbm/County.hbm.xml" />
         <mapping resource="hibernate/hbm/Label.hbm.xml" />
-        <mapping resource="hibernate/hbm/Method.hbm.xml" />
         <mapping resource="hibernate/hbm/Note.hbm.xml" />
         <mapping resource="hibernate/hbm/Organization.hbm.xml" />
         <mapping resource="hibernate/hbm/Panel.hbm.xml" />
