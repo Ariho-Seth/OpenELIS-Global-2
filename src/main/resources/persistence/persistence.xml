@@ -147,6 +147,9 @@
         <!-- Method entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.method.valueholder.Method</class>
 
+        <!-- Image entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.image.valueholder.Image</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />
