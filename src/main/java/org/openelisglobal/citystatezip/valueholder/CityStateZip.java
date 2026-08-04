@@ -16,7 +16,6 @@ package org.openelisglobal.citystatezip.valueholder;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -34,7 +33,6 @@ import org.openelisglobal.common.valueholder.BaseObject;
 public class CityStateZip extends BaseObject<String> {
 
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0)
     private String id;

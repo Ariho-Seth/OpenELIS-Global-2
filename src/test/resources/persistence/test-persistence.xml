@@ -85,7 +85,7 @@
         <class>org.openelisglobal.coldstorage.valueholder.FreezerReading</class>
         <class>org.openelisglobal.coldstorage.valueholder.ThresholdProfile</class>
         <class>org.openelisglobal.coldstorage.valueholder.FreezerThresholdProfile</class>
-        ic
+
         <!-- Alert entities -->
         <class>org.openelisglobal.alert.valueholder.Alert</class>
         <class>org.openelisglobal.coldstorage.valueholder.CorrectiveAction</class>

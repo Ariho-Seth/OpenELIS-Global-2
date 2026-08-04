@@ -22,6 +22,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import java.sql.Date;
 import lombok.Getter;
 import lombok.Setter;
@@ -44,8 +45,8 @@ import org.openelisglobal.qaevent.valueholder.QaEvent;
 public class AnalysisQaEvent extends BaseObject<String> {
 
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+    @GeneratedValue(generator = "analysis_qaevent_seq_gen")
+    @GenericGenerator(name = "analysis_qaevent_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @org.hibernate.annotations.Parameter(name = "sequence_name", value = "analysis_qaevent_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
@@ -62,8 +63,10 @@ public class AnalysisQaEvent extends BaseObject<String> {
     @Column(name = "COMPLETED_DATE", length = 7)
     private Date completedDate;
 
+    @Transient
     private String completedDateForDisplay;
 
+    @Transient
     private String analysisQaEventDisplayValue;
 
     public AnalysisQaEvent() {

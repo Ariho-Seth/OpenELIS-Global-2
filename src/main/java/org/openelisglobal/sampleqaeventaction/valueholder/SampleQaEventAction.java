@@ -51,8 +51,8 @@ import org.openelisglobal.systemuser.valueholder.SystemUser;
 public class SampleQaEventAction extends BaseObject<String> {
 
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+    @GeneratedValue(generator = "sample_qaevent_action_seq_genr")
+    @GenericGenerator(name = "sample_qaevent_action_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "sample_qaevent_action_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
@@ -69,6 +69,7 @@ public class SampleQaEventAction extends BaseObject<String> {
     @Column(name = "CREATED_DATE", length = 7, nullable = false)
     private Date createdDate;
 
+    @Transient
     private String createdDateForDisplay;
 
     // bugzilla 2481
