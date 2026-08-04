@@ -44,17 +44,17 @@ import org.openelisglobal.localization.valueholder.Localization;
 public class Method extends EnumValueItemImpl {
 
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+    @GeneratedValue(generator = "method_seq_gen")
+    @GenericGenerator(name = "method_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @org.hibernate.annotations.Parameter(name = "sequence_name", value = "method_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
-    @Column(name = "ID", precision = 10, scale = 0, nullable = false)
+    @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 
-    @Column(name = "name", length = 25, nullable = true)
+    @Column(name = "NAME", length = 20, nullable = false)
     private String methodName;
 
-    @Column(name = "description", length = 60, nullable = true)
+    @Column(name = "DESCRIPTION", length = 60, nullable = false)
     private String description;
 
     @Column(name = "REPORTING_DESCRIPTION", length = 60)
@@ -72,10 +72,10 @@ public class Method extends EnumValueItemImpl {
     @Transient
     private String activeEndDateForDisplay = null;
 
-    @Column(name = "is_Active", length = 60)
+    @Column(name = "IS_ACTIVE", length = 1)
     private String isActive;
 
-    @Column(name = "code", length = 20)
+    @Column(name = "CODE", length = 20)
     private String code;
 
     @ManyToOne(fetch = FetchType.EAGER)
