@@ -31,8 +31,8 @@ public class BarcodeLabelInfo extends BaseObject<String> {
 
     // PK
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+    @GeneratedValue(generator = "barcode_label_info_seq_gen")
+    @GenericGenerator(name = "barcode_label_info_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "barcode_label_info_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)

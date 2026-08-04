@@ -29,7 +29,7 @@ public class AddressPK implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
-    @Column(name = "organization_id", nullable = false)
+    @Column(name = "targetId", nullable = false)
     private String targetId;
 
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")

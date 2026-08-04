@@ -43,14 +43,14 @@ import org.openelisglobal.region.valueholder.Region;
 public class County extends EnumValueItemImpl {
 
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+    @GeneratedValue(generator = "county_seq_gen")
+    @GenericGenerator(name = "county_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "county_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
     private String id;
 
-    @Column(name = "county", precision = 75, nullable = false)
+    @Column(name = "county", length = 75, nullable = false)
     private String county;
 
     @ManyToOne(fetch = FetchType.LAZY)

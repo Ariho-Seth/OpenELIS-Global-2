@@ -13,7 +13,6 @@
  */
 package org.openelisglobal.address.valueholder;
 
-import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,14 +31,13 @@ import org.openelisglobal.common.valueholder.BaseObject;
 @DynamicUpdate
 @Entity
 @Table(name = "address_part")
-@AttributeOverride(name = "nameKey", column = @Column(name = "display_key", length = 60))
 public class AddressPart extends BaseObject<String> {
 
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(generator = "string-sequence-generator")
-    @GenericGenerator(name = "string-sequence-generator", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
+    @GeneratedValue(generator = "address_part_seq_gen")
+    @GenericGenerator(name = "address_part_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "address_part_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0, nullable = false)
@@ -51,4 +49,7 @@ public class AddressPart extends BaseObject<String> {
     @Column(name = "display_order")
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String displayOrder;
+
+    @Column(name = "display_key", length = 60)
+    private String nameKey;
 }

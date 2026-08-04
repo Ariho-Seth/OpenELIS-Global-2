@@ -13,7 +13,12 @@
  */
 package org.openelisglobal.address.valueholder;
 
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.validator.GenericValidator;
@@ -25,6 +30,7 @@ import org.openelisglobal.common.valueholder.BaseObject;
 @DynamicUpdate
 @Entity
 @Table(name = "organization_address")
+@AttributeOverride(name = "compoundId.targetId", column = @Column(name = "organization_id"))
 public class OrganizationAddress extends BaseObject<AddressPK> {
 
     private static final long serialVersionUID = 1L;
@@ -40,10 +46,6 @@ public class OrganizationAddress extends BaseObject<AddressPK> {
 
     @Transient
     private String uniqueIdentifyer;
-
-    public AddressPK getCompoundId() {
-        return compoundId;
-    }
 
     public void setCompoundId(AddressPK compoundId) {
         uniqueIdentifyer = null;
@@ -80,26 +82,6 @@ public class OrganizationAddress extends BaseObject<AddressPK> {
 
     public String getAddressPartId() {
         return compoundId == null ? null : compoundId.getAddressPartId();
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public void setUniqueIdentifyer(String uniqueIdentifyer) {
-        this.uniqueIdentifyer = uniqueIdentifyer;
     }
 
     public String getUniqueIdentifyer() {
