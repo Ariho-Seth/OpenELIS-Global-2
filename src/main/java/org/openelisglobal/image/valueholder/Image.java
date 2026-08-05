@@ -52,6 +52,7 @@ public class Image extends BaseObject<String> {
     private String description;
 
     @Column(name = "image")
+    @Type(type = "org.hibernate.type.BinaryType")
     private byte[] image;
 
 }
