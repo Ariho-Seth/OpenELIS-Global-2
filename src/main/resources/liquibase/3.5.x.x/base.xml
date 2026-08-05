@@ -177,4 +177,7 @@
   <include relativeToChangelogFile="true" file="066-sample-type-domain-enum-migration.xml"/>
   <include relativeToChangelogFile="true" file="067-sample-type-disposal-instructions.xml"/>
 
+
+  <include relativeToChangelogFile="true" file="add-column-to-address.xml"/>
+
 </databaseChangeLog>
