@@ -13,6 +13,7 @@ import org.hibernate.cfg.Configuration;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.openelisglobal.person.valueholder.Person;
 
 /**
  * Validates Hibernate ORM mappings for Patient entity (including merge tracking
@@ -35,12 +36,11 @@ public class PatientHibernateMappingValidationTest {
     public static void buildSessionFactory() {
         Configuration configuration = new Configuration();
 
-        // Add Patient entity mapping using XML-based approach (legacy pattern)
-        configuration.addResource("hibernate/hbm/Patient.hbm.xml");
+        configuration.addAnnotatedClass(Patient.class);
 
         // Add dependent entity mappings that Patient references
         // Person is required for Patient's many-to-one relationship
-        configuration.addResource("hibernate/hbm/Person.hbm.xml");
+        configuration.addAnnotatedClass(Person.class);
 
         // Configure minimal properties (no actual DB connection)
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");

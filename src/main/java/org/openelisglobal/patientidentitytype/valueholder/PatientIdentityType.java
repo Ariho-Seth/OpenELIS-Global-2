@@ -20,8 +20,9 @@ public class PatientIdentityType extends BaseObject<String> {
 
     @Id
     @GeneratedValue(generator = "patient_identity_type_seq_gen")
-    @GenericGenerator(name = "patient_identity_type_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "patient_identiy_type_seq"))
+    @GenericGenerator(name = "patient_identity_type_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "patient_identity_type_seq"))
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 
     @Column(name = "IDENTITY_TYPE", length = 30)
