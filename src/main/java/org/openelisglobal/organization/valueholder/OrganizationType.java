@@ -16,62 +16,50 @@
 package org.openelisglobal.organization.valueholder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.openelisglobal.common.valueholder.BaseObject;
 
+@Setter
+@Getter
+@Entity
+@DynamicUpdate
+@Table(name = "ORGANIZATION_TYPE")
+@AttributeOverrides({ @AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED")),
+        @AttributeOverride(name = "nameKey", column = @Column(name = "name_display_key", length = 60, nullable = true)) })
 public class OrganizationType extends BaseObject<String> {
 
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(generator = "organization_type_seq_gen")
+    @GenericGenerator(name = "organization_type_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "organization_type_seq"))
+    @Column(name = "ID", precision = 10, scale = 0)
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String id;
+
+    @Column(name = "SHORT_NAME", length = 20, nullable = false)
     private String name;
+
+    @Column(name = "DESCRIPTION", length = 60, nullable = true)
     private String description;
+
+    @Column(name = "hierarchy_level", nullable = true)
     private Integer hierarchyLevel;
+
     @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "organization_organization_type", joinColumns = @JoinColumn(name = "org_type_id"), inverseJoinColumns = @JoinColumn(name = "org_id"))
     private Set<Organization> organizations;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Integer getHierarchyLevel() {
-        return hierarchyLevel;
-    }
-
-    public void setHierarchyLevel(Integer hierarchyLevel) {
-        this.hierarchyLevel = hierarchyLevel;
-    }
 
     @Override
     protected String getDefaultLocalizedName() {
         return name;
     }
 
-    public void setOrganizations(Set<Organization> organizations) {
-        this.organizations = organizations;
-    }
-
-    public Set<Organization> getOrganizations() {
-        return organizations;
-    }
 }
