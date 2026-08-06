@@ -147,6 +147,9 @@
         <!-- Analysis entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.analysis.valueholder.Analysis</class>
 
+        <!-- Test entities (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.test.valueholder.TestSection</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />
