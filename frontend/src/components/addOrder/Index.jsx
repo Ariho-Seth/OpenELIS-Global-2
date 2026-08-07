@@ -127,11 +127,27 @@ const Index = () => {
         method: "get",
         //indicator: 'throbbing',
         headers: {
+          Accept: "application/json",
           "X-CSRF-Token": localStorage.getItem("CSRF"),
         },
       },
     )
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) {
+          return response
+            .json()
+            .then((errorJson) => {
+              throw new Error(
+                errorJson.message || `HTTP error! status: ${response.status}`,
+              );
+            })
+            .catch(() => {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            });
+        }
+
+        return response.json();
+      })
       .then((jsonResponse) => {
         success(jsonResponse);
       })

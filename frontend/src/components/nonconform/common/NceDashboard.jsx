@@ -436,7 +436,16 @@ export const NceDashboard = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Download failed");
+        let errorMessage = "Failed to download attachment";
+
+        try {
+          const errorJson = await response.json();
+          errorMessage = errorJson.message || errorMessage;
+        } catch (e) {
+          // Fallback if the response wasn't JSON
+        }
+
+        throw new Error(errorMessage);
       }
 
       const blob = await response.blob();
@@ -474,7 +483,16 @@ export const NceDashboard = () => {
       });
 
       if (!response.ok) {
-        throw new Error("View failed");
+        let errorMessage = "Failed to view attachment";
+
+        try {
+          const errorJson = await response.json();
+          errorMessage = errorJson.message || errorMessage;
+        } catch (e) {
+          // Fallback if the response wasn't JSON
+        }
+
+        throw new Error(errorMessage);
       }
 
       const blob = await response.blob();
