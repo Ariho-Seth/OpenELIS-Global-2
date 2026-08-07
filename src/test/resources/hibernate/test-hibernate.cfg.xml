@@ -71,7 +71,6 @@
         <mapping resource="hibernate/hbm/SourceOfSample.hbm.xml" />
         <mapping resource="hibernate/hbm/StatusOfSample.hbm.xml" />
         <mapping resource="hibernate/hbm/SystemUser.hbm.xml" />
-        <mapping resource="hibernate/hbm/Test.hbm.xml" />
         <mapping resource="hibernate/hbm/RenameTestSection.hbm.xml" />
         <mapping resource="hibernate/hbm/TestAnalyte.hbm.xml" />
         <mapping

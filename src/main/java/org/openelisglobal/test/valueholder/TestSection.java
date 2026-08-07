@@ -13,20 +13,12 @@
  */
 package org.openelisglobal.test.valueholder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 import org.openelisglobal.common.valueholder.EnumValueItemImpl;
@@ -37,8 +29,10 @@ import org.openelisglobal.test.service.TestSectionService;
 
 @Setter
 @Getter
+@DynamicUpdate
 @Entity
 @Table(name = "TEST_SECTION")
+@AttributeOverride(name = "nameKey", column = @Column(name = "display_key", length = 60))
 public class TestSection extends EnumValueItemImpl {
 
     private static final long serialVersionUID = -1574344492809195601L;
@@ -57,7 +51,7 @@ public class TestSection extends EnumValueItemImpl {
     @Column(name = "LASTUPDATED")
     private Timestamp lastupdated;
 
-    @Column(name = "Name", length = 20)
+    @Column(name = "NAME", length = 20)
     private String testSectionName;
 
     @Column(name = "DESCRIPTION", length = 60, nullable = false)
@@ -146,4 +140,5 @@ public class TestSection extends EnumValueItemImpl {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

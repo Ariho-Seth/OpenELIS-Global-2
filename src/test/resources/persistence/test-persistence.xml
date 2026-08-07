@@ -204,6 +204,7 @@
         <class>org.openelisglobal.analysis.valueholder.Analysis</class>
 
         <!-- Test entities (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.test.valueholder.Test</class>
         <class>org.openelisglobal.test.valueholder.TestSection</class>
 
         <properties>
