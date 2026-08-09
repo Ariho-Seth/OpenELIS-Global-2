@@ -13,6 +13,7 @@
  */
 package org.openelisglobal.sampleitem.valueholder;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -23,7 +24,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -48,6 +48,7 @@ import org.openelisglobal.unitofmeasure.valueholder.UnitOfMeasure;
 @DynamicUpdate
 @Entity
 @Table(name = "SAMPLE_ITEM")
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class SampleItem extends BaseObject<String> implements NoteObject {
 
     private static final long serialVersionUID = 1L;
@@ -176,9 +177,8 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
      * Prevents race conditions when multiple users aliquot the same sample
      * concurrently. Mapped via hbm.xml as 'lastupdated' column.
      */
-    @Version
-    @Column(name = "LASTUPDATED")
-    private Timestamp lastupdated;
+    @Transient
+    private Timestamp version;
 
     public SampleItem() {
         super();
