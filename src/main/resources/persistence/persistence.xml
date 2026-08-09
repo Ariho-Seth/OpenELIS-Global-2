@@ -150,6 +150,12 @@
         <!-- Image entity (migrated from HBM to JPA annotations) -->
         <class>org.openelisglobal.image.valueholder.Image</class>
 
+        <!-- Note entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.note.valueholder.Note</class>
+
+        <!-- ObservationHistory entity (migrated from HBM to JPA annotations) -->
+        <class>org.openelisglobal.observationhistory.valueholder.ObservationHistory</class>
+
         <properties>
             <property name="hibernate.cfg_xml_file"
                 value="classpath:hibernate/hibernate.cfg.xml" />

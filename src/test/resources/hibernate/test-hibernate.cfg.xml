@@ -38,7 +38,6 @@
         <mapping resource="hibernate/hbm/StateView.hbm.xml" />
         <mapping resource="hibernate/hbm/County.hbm.xml" />
         <mapping resource="hibernate/hbm/Label.hbm.xml" />
-        <mapping resource="hibernate/hbm/Note.hbm.xml" />
         <mapping resource="hibernate/hbm/Organization.hbm.xml" />
         <mapping resource="hibernate/hbm/Panel.hbm.xml" />
         <mapping resource="hibernate/hbm/PanelItem.hbm.xml" />
@@ -103,7 +102,6 @@
         <mapping resource="hibernate/hbm/SiteInformation.hbm.xml" />
         <mapping
             resource="hibernate/hbm/SiteInformationDomain.hbm.xml" />
-        <mapping resource="hibernate/hbm/ObservationHistory.hbm.xml" />
         <mapping
             resource="hibernate/hbm/ObservationHistoryType.hbm.xml" />
         <mapping resource="hibernate/hbm/ReferralReason.hbm.xml" />
