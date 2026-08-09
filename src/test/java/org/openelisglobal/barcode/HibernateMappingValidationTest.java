@@ -22,7 +22,6 @@ public class HibernateMappingValidationTest {
         config.addAnnotatedClass(SampleItemBarcodeInfo.class);
         config.addAnnotatedClass(Localization.class);
         config.addAnnotatedClass(LocalizationValue.class);
-        config.addResource("hibernate/hbm/Sample.hbm.xml");
         config.addResource("hibernate/hbm/SampleItem.hbm.xml");
         config.addResource("hibernate/hbm/TypeOfSample.hbm.xml");
         config.addResource("hibernate/hbm/UnitOfMeasure.hbm.xml");

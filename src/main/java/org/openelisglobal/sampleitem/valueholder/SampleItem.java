@@ -13,14 +13,28 @@
  */
 package org.openelisglobal.sampleitem.valueholder;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.openelisglobal.common.valueholder.BaseObject;
-import org.openelisglobal.common.valueholder.ValueHolder;
-import org.openelisglobal.common.valueholder.ValueHolderInterface;
 import org.openelisglobal.note.service.NoteObject;
 import org.openelisglobal.note.service.NoteServiceImpl.BoundTo;
 import org.openelisglobal.sample.valueholder.Sample;
@@ -29,37 +43,103 @@ import org.openelisglobal.sourceofsample.valueholder.SourceOfSample;
 import org.openelisglobal.typeofsample.valueholder.TypeOfSample;
 import org.openelisglobal.unitofmeasure.valueholder.UnitOfMeasure;
 
+@Setter
+@Getter
+@DynamicUpdate
+@Entity
+@Table(name = "SAMPLE_ITEM")
 public class SampleItem extends BaseObject<String> implements NoteObject {
 
     private static final long serialVersionUID = 1L;
 
+    @Id
+    @GeneratedValue(generator = "sample_item_seq_gen")
+    @GenericGenerator(name = "sample_item_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "sample_item_seq"))
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 
+    @Column(name = "QUANTITY", precision = 22, scale = 0)
     private Double quantity;
 
+    @Column(name = "fhir_uuid")
     private UUID fhirUuid;
-    private ValueHolderInterface sample;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "SAMP_ID")
+    private Sample sample;
+
+    @Column(name = "SAMPITEM_ID", precision = 10, scale = 0)
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String sampleItemId;
+
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "SORT_ORDER", precision = 22, scale = 0)
     private String sortOrder;
-    private ValueHolderInterface sourceOfSample;
+
+    @Transient
+    private SourceOfSample sourceOfSample;
+
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "SOURCE_ID", precision = 10, scale = 0)
     private String sourceOfSampleId;
+
+    @Column(name = "SOURCE_OTHER", length = 40)
     private String sourceOther;
-    private ValueHolderInterface typeOfSample;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "TYPEOSAMP_ID")
+    private TypeOfSample typeOfSample;
+
+    @Transient
     private String typeOfSampleId;
-    private ValueHolderInterface unitOfMeasure;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "UOM_ID")
+    private UnitOfMeasure unitOfMeasure;
+
+    @Transient
     private String unitOfMeasureName;
+
+    @Column(name = "external_id")
     private String externalId;
+
+    @Column(name = "collection_date")
     private Timestamp collectionDate;
+
+    @Column(name = "status_id")
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String statusId;
+
+    @Column(name = "collector")
     private String collector;
+
+    @Column(name = "collection_conditions")
     private String collectionConditions;
+
+    @Column(name = "collection_method")
     private String collectionMethod;
+
+    @Column(name = "sample_temperature")
     private String sampleTemperature;
+
+    @Column(name = "specimen_origin")
     private String specimenOrigin;
+
+    @Column(name = "received_date")
     private Timestamp receivedDate;
+
+    @Column(name = "rejected")
     private boolean rejected = false;
+
+    @Column(name = "reject_reason_id")
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String rejectReasonId;
+
+    @Column(name = "voided")
     private boolean voided = false;
+
+    @Column(name = "void_reason")
     private String voidReason;
 
     // ========== Aliquoting Support Fields (Feature 001-sample-management)
@@ -71,6 +151,8 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
      * creating aliquots. Cannot be negative. If null, the quantity field should be
      * used as the remaining quantity (for legacy samples without aliquoting).
      */
+
+    @Column(name = "remaining_quantity")
     private BigDecimal remainingQuantity;
 
     /**
@@ -78,12 +160,15 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
      * references parent for aliquots. Enables recursive aliquoting (aliquots of
      * aliquots).
      */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_sample_item_id")
     private SampleItem parentSampleItem;
 
     /**
      * Child aliquots created from this sample item. Empty for aliquots that haven't
      * been further divided. Enables querying sample hierarchy.
      */
+    @OneToMany(mappedBy = "parentSampleItem", fetch = FetchType.LAZY)
     private List<SampleItem> childAliquots = new ArrayList<>();
 
     /**
@@ -91,31 +176,13 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
      * Prevents race conditions when multiple users aliquot the same sample
      * concurrently. Mapped via hbm.xml as 'lastupdated' column.
      */
-    private Timestamp version;
+    @Version
+    @Column(name = "LASTUPDATED")
+    private Timestamp lastupdated;
 
     public SampleItem() {
         super();
-        typeOfSample = new ValueHolder();
-        sourceOfSample = new ValueHolder();
-        unitOfMeasure = new ValueHolder();
-        sample = new ValueHolder();
         childAliquots = new ArrayList<>();
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
-    public Timestamp getCollectionDate() {
-        return collectionDate;
-    }
-
-    public void setCollectionDate(Timestamp collectionDate) {
-        this.collectionDate = collectionDate;
     }
 
     @Override
@@ -128,14 +195,6 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
         return id;
     }
 
-    public void setQuantity(Double quantity) {
-        this.quantity = quantity;
-    }
-
-    public Double getQuantity() {
-        return quantity;
-    }
-
     public String getTypeOfSampleId() {
         if (typeOfSampleId == null) {
             if (getTypeOfSample() != null) {
@@ -146,14 +205,6 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
         return typeOfSampleId;
     }
 
-    public String getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(String sortOrder) {
-        this.sortOrder = sortOrder;
-    }
-
     public String getSourceOfSampleId() {
         if (sourceOfSampleId == null) {
             if (getSourceOfSample() != null) {
@@ -161,122 +212,6 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
             }
         }
         return sourceOfSampleId;
-    }
-
-    public void setSourceOfSampleId(String sourceOfSampleId) {
-        this.sourceOfSampleId = sourceOfSampleId;
-    }
-
-    public String getSourceOther() {
-        return sourceOther;
-    }
-
-    public void setSourceOther(String sourceOther) {
-        this.sourceOther = sourceOther;
-    }
-
-    public Sample getSample() {
-        return (Sample) sample.getValue();
-    }
-
-    public void setSample(Sample sample) {
-        this.sample.setValue(sample);
-    }
-
-    public String getSampleItemId() {
-        return sampleItemId;
-    }
-
-    public void setSampleItemId(String sampleItemId) {
-        this.sampleItemId = sampleItemId;
-    }
-
-    public TypeOfSample getTypeOfSample() {
-        return (TypeOfSample) typeOfSample.getValue();
-    }
-
-    public void setTypeOfSample(TypeOfSample typeOfSample) {
-        this.typeOfSample.setValue(typeOfSample);
-    }
-
-    public SourceOfSample getSourceOfSample() {
-        return (SourceOfSample) sourceOfSample.getValue();
-    }
-
-    public void setSourceOfSample(SourceOfSample sourceOfSample) {
-        this.sourceOfSample.setValue(sourceOfSample);
-    }
-
-    public UnitOfMeasure getUnitOfMeasure() {
-        return (UnitOfMeasure) unitOfMeasure.getValue();
-    }
-
-    public void setUnitOfMeasure(UnitOfMeasure unitOfMeasure) {
-        this.unitOfMeasure.setValue(unitOfMeasure);
-    }
-
-    public String getUnitOfMeasureName() {
-        return unitOfMeasureName;
-    }
-
-    public void setUnitOfMeasureName(String unitOfMeasureName) {
-        this.unitOfMeasureName = unitOfMeasureName;
-    }
-
-    public String getStatusId() {
-        return statusId;
-    }
-
-    public void setStatusId(String statusId) {
-        this.statusId = statusId;
-    }
-
-    public String getCollector() {
-        return collector;
-    }
-
-    public void setCollector(String collector) {
-        this.collector = collector;
-    }
-
-    public String getCollectionConditions() {
-        return collectionConditions;
-    }
-
-    public void setCollectionConditions(String collectionConditions) {
-        this.collectionConditions = collectionConditions;
-    }
-
-    public String getCollectionMethod() {
-        return collectionMethod;
-    }
-
-    public void setCollectionMethod(String collectionMethod) {
-        this.collectionMethod = collectionMethod;
-    }
-
-    public String getSampleTemperature() {
-        return sampleTemperature;
-    }
-
-    public void setSampleTemperature(String sampleTemperature) {
-        this.sampleTemperature = sampleTemperature;
-    }
-
-    public String getSpecimenOrigin() {
-        return specimenOrigin;
-    }
-
-    public void setSpecimenOrigin(String specimenOrigin) {
-        this.specimenOrigin = specimenOrigin;
-    }
-
-    public Timestamp getReceivedDate() {
-        return receivedDate;
-    }
-
-    public void setReceivedDate(Timestamp receivedDate) {
-        this.receivedDate = receivedDate;
     }
 
     @Override
@@ -294,59 +229,8 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
         return BoundTo.SAMPLE_ITEM;
     }
 
-    public UUID getFhirUuid() {
-        return fhirUuid;
-    }
-
-    public void setFhirUuid(UUID fhirUuid) {
-        this.fhirUuid = fhirUuid;
-    }
-
     public String getFhirUuidAsString() {
         return fhirUuid == null ? "" : fhirUuid.toString();
-    }
-
-    public boolean isRejected() {
-        return rejected;
-    }
-
-    public void setRejected(boolean rejected) {
-        this.rejected = rejected;
-    }
-
-    public String getRejectReasonId() {
-        return rejectReasonId;
-    }
-
-    public void setRejectReasonId(String rejectReasonId) {
-        this.rejectReasonId = rejectReasonId;
-    }
-
-    public boolean isVoided() {
-        return voided;
-    }
-
-    public void setVoided(boolean voided) {
-        this.voided = voided;
-    }
-
-    public String getVoidReason() {
-        return voidReason;
-    }
-
-    public void setVoidReason(String voidReason) {
-        this.voidReason = voidReason;
-    }
-
-    // ========== Aliquoting Getters/Setters (Feature 001-sample-management)
-    // ==========
-
-    public BigDecimal getRemainingQuantity() {
-        return remainingQuantity;
-    }
-
-    public void setRemainingQuantity(BigDecimal remainingQuantity) {
-        this.remainingQuantity = remainingQuantity;
     }
 
     /**
@@ -361,22 +245,6 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
         }
         // Fallback to quantity for legacy samples without remainingQuantity set
         return quantity != null ? BigDecimal.valueOf(quantity) : null;
-    }
-
-    public SampleItem getParentSampleItem() {
-        return parentSampleItem;
-    }
-
-    public void setParentSampleItem(SampleItem parentSampleItem) {
-        this.parentSampleItem = parentSampleItem;
-    }
-
-    public List<SampleItem> getChildAliquots() {
-        return childAliquots;
-    }
-
-    public void setChildAliquots(List<SampleItem> childAliquots) {
-        this.childAliquots = childAliquots;
     }
 
     /**

@@ -48,7 +48,6 @@ public class HibernateMappingValidationTest {
         // TypeOfSample depends on Localization (JPA entity)
         configuration.addAnnotatedClass(org.openelisglobal.localization.valueholder.Localization.class);
         configuration.addAnnotatedClass(org.openelisglobal.localization.valueholder.LocalizationValue.class);
-        configuration.addResource("hibernate/hbm/Sample.hbm.xml");
         configuration.addResource("hibernate/hbm/SampleItem.hbm.xml");
         configuration.addResource("hibernate/hbm/TypeOfSample.hbm.xml");
         configuration.addResource("hibernate/hbm/UnitOfMeasure.hbm.xml");
