@@ -11,7 +11,27 @@ import {
 import {
   getFromOpenElisServer,
   postToOpenElisServerFormData,
+  postToOpenElisServerJsonResponse,
 } from "../../utils/Utils";
+// the shipped programme-response renderer (programView/:id) — plain jsx
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import QuestionnaireResponse from "../../common/QuestionnaireResponse";
+// the shipped storage-location picker the old Results page opens inline —
+// workflow-agnostic modal; the caller translates its confirm into the
+// assign/move REST calls. Plain jsx/js, hence the ts-ignores.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import LocationPickerModal from "../../storage/LocationPicker/LocationPickerModal";
+import {
+  getDeepestLocationSelection,
+  positionToCoordinate,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+} from "../../storage/LocationPicker/locationSelectionMapper";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import { isStorageAssignmentSuccess } from "../../storage/LocationPicker/storageAssignmentResponse";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import config from "../../../config.json";
@@ -24,6 +44,11 @@ import config from "../../../config.json";
  * mounted (FR-C5).
  */
 
+/** FHIR QuestionnaireResponse — the programme's captured answers. */
+interface ProgramQuestionnaireResponse {
+  item?: unknown[];
+}
+
 interface SampleOrderItems {
   providerFirstName?: string;
   providerLastName?: string;
@@ -34,6 +59,7 @@ interface SampleOrderItems {
   collectionDate?: string;
   receivedDateForDisplay?: string;
   program?: string;
+  additionalQuestions?: ProgramQuestionnaireResponse;
 }
 
 export interface OrderContext {
@@ -130,6 +156,7 @@ export const ProgrammeSection: React.FC<
   }
 > = ({ open, onToggle, order, eqaSample, eqaPriority }) => {
   const program = order.sampleOrderItems?.program;
+  const capturedAnswers = order.sampleOrderItems?.additionalQuestions;
   if (!order.loaded || (!program && !eqaSample)) {
     return null;
   }
@@ -154,6 +181,19 @@ export const ProgrammeSection: React.FC<
           </div>
         )}
       </div>
+      {/* the programme's captured answers, rendered exactly as programView/:id
+          renders them (shared QuestionnaireResponse component) */}
+      {capturedAnswers?.item && capturedAnswers.item.length > 0 && (
+        <div
+          className="unifiedProgramAnswers"
+          data-testid="program-captured-data"
+        >
+          <span className="cds--label">
+            <FormattedMessage id="label.results.program.capturedData" />
+          </span>
+          <QuestionnaireResponse questionnaireResponse={capturedAnswers} />
+        </div>
+      )}
       <div className="unifiedHistoryFootnote">
         <FormattedMessage id="label.results.program.readonly" />
       </div>
@@ -167,16 +207,71 @@ interface StorageLocation extends QuantitySnapshot {
   notes?: string;
 }
 
+export interface LocationPickerConfirm {
+  selection: Record<string, unknown>;
+  position: unknown;
+  reason?: string;
+  notes?: string;
+}
+
+/**
+ * The old Results page's confirm-to-REST translation
+ * (SearchResultForm.handleLocationAssignment), extracted verbatim: deepest
+ * assignable level wins, movement (a location already exists) goes to /move
+ * with a defaulted reason, first assignment goes to /assign. Returns null
+ * when nothing assignable was selected.
+ */
+export const storageAssignmentRequest = (
+  sampleItemId: string,
+  isMovement: boolean,
+  confirm: LocationPickerConfirm,
+): { url: string; body: Record<string, unknown> } | null => {
+  const deepest = getDeepestLocationSelection(confirm.selection || {}, {
+    requireAssignable: true,
+  });
+  if (!deepest) {
+    return null;
+  }
+  const body: Record<string, unknown> = {
+    sampleItemId,
+    locationId: String(deepest.value.id),
+    locationType: deepest.type,
+    positionCoordinate: positionToCoordinate(confirm.position) || "",
+    notes: confirm.notes || "",
+  };
+  if (isMovement) {
+    body.reason = confirm.reason || "Reassignment from result entry workflow";
+  }
+  return {
+    url: isMovement
+      ? "/rest/storage/sample-items/move"
+      : "/rest/storage/sample-items/assign",
+    body,
+  };
+};
+
 export const StorageSection: React.FC<
   SectionProps & {
     sampleItemId?: string;
+    accessionNumber?: string;
+    sampleType?: string;
     editable?: boolean;
     actions?: React.ReactNode;
   }
-> = ({ open, onToggle, sampleItemId, editable, actions }) => {
+> = ({
+  open,
+  onToggle,
+  sampleItemId,
+  accessionNumber,
+  sampleType,
+  editable,
+  actions,
+}) => {
   const intl = useIntl();
   const [location, setLocation] = useState<StorageLocation | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [saveError, setSaveError] = useState("");
   useEffect(() => {
     if (!sampleItemId) {
       return;
@@ -190,6 +285,44 @@ export const StorageSection: React.FC<
     return null;
   }
   const path = location?.hierarchicalPath || "";
+
+  // storage stays analysis/sample-item-level, shared by all component rows
+  const handlePickerConfirm = (confirm: LocationPickerConfirm) => {
+    const request = storageAssignmentRequest(
+      sampleItemId,
+      Boolean(path),
+      confirm,
+    );
+    if (!request) {
+      setSaveError(
+        intl.formatMessage({
+          id: "storage.location.assigned.error",
+          defaultMessage: "Failed to assign location",
+        }),
+      );
+      return;
+    }
+    postToOpenElisServerJsonResponse(
+      request.url,
+      JSON.stringify(request.body),
+      (response: Record<string, unknown> | undefined) => {
+        if (isStorageAssignmentSuccess(response)) {
+          setSaveError("");
+          setPickerOpen(false);
+          setRefreshKey((k) => k + 1);
+        } else {
+          setSaveError(
+            (response?.message as string) ||
+              intl.formatMessage({
+                id: "storage.location.assigned.error",
+                defaultMessage: "Failed to assign location",
+              }),
+          );
+        }
+      },
+    );
+  };
+
   return (
     <ReferenceSection
       sectionId="storage"
@@ -218,10 +351,42 @@ export const StorageSection: React.FC<
         kind="secondary"
         size="sm"
         className="unifiedFieldSpacer"
-        onClick={() => window.open("/Storage/sample-items", "_blank")}
+        onClick={() => setPickerOpen(true)}
+        data-testid="storage-location-button"
       >
-        <FormattedMessage id="label.results.storage.move" />
+        <FormattedMessage
+          id={
+            path
+              ? "label.results.storage.moveLocation"
+              : "label.results.storage.assignLocation"
+          }
+        />
       </Button>
+      {saveError && <div className="unifiedSampleStatusError">{saveError}</div>}
+      {pickerOpen && (
+        <LocationPickerModal
+          isOpen={pickerOpen}
+          sample={{
+            id: sampleItemId,
+            sampleAccessionNumber: accessionNumber || "",
+            sampleType: sampleType || "",
+            status: "Active",
+          }}
+          currentLocation={
+            path
+              ? {
+                  selection: {},
+                  hierarchicalPath: path,
+                  position: location?.positionCoordinate
+                    ? { mode: "text", value: location.positionCoordinate }
+                    : null,
+                }
+              : null
+          }
+          onConfirm={handlePickerConfirm}
+          onCancel={() => setPickerOpen(false)}
+        />
+      )}
       {location && (
         <SampleStatusBlock
           sampleItemId={sampleItemId}
