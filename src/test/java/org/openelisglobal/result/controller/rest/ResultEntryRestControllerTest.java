@@ -529,11 +529,75 @@ public class ResultEntryRestControllerTest extends BaseWebContextSensitiveTest {
                         org.hamcrest.CoreMatchers.hasItem(org.hamcrest.CoreMatchers.containsString("NCE-42"))));
     }
 
+    /**
+     * OGC-1026 (R7, FR-G1) — an interpretation entered on the unified page rides
+     * the save as an EXTERNAL note under the "Interpretation" subject, so it
+     * reaches the patient report and the analysis timeline without new schema.
+     */
+    @Test
+    public void save_withInterpretation_writesReportVisibleNote() throws Exception {
+        mockMvc.perform(post("/rest/results-entry/analysis/1/result").contentType(MediaType.APPLICATION_JSON)
+                .content(saveBodyWithExtras("1", "3", "1", "90.0", currentToken("1"),
+                        "\"note\":\"\",\"interpretation\":\"Fasting glucose within the reference range.\""))
+                .session(session)).andExpect(status().isOk());
+
+        Integer notes = jdbc.queryForObject("SELECT count(*) FROM clinlims.note WHERE reference_id = 1"
+                + " AND note_type = 'E' AND subject = 'Interpretation'"
+                + " AND text = 'Fasting glucose within the reference range.'", Integer.class);
+        assertEquals(Integer.valueOf(1), notes);
+    }
+
     @Test
     public void labUnitDomain_mapsFromTestSectionColumn() {
         // FR-M1 foundation: the OGC-1020 test_section.domain column round-trips
         // through the hbm mapping; unset rows default CLINICAL.
         assertEquals("ENVIRONMENTAL", testSectionService.get("2").getDomain());
         assertEquals("CLINICAL", testSectionService.get("1").getDomain());
+    }
+
+    /**
+     * OGC-1021 (R2, FR-G) — interpretation rule buckets configured on the test's
+     * components are readable through the RESULTS-role endpoint (the catalog
+     * editor's own endpoint is ADMIN-only and would hide them from bench techs).
+     */
+    @Test
+    public void testInterpretations_returnsActiveBucketsForResultsRole() throws Exception {
+        jdbc.update("INSERT INTO clinlims.test_result_component (id, test_id, code, label, is_primary, is_active,"
+                + " lastupdated) VALUES ('c-9401', 1, 'PRIMARY', 'Primary', true, 'Y', NOW())");
+        jdbc.update("INSERT INTO clinlims.test_result_interpretation (id, component_id, value_match,"
+                + " interpretation_text, severity, color, display_order, is_active, lastupdated)"
+                + " VALUES ('i-9401', 'c-9401', '70-99', 'Normal fasting glucose.', 'NORMAL', 'green', 1, 'Y',"
+                + " NOW())");
+        jdbc.update("INSERT INTO clinlims.test_result_interpretation (id, component_id, value_match,"
+                + " interpretation_text, severity, color, display_order, is_active, lastupdated)"
+                + " VALUES ('i-9402', 'c-9401', '>=126', 'Diabetic range.', 'CRITICAL', 'red', 2, 'N', NOW())");
+
+        mockMvc.perform(get("/rest/results-entry/test/1/interpretations").session(session)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].valueMatch").value("70-99"))
+                .andExpect(jsonPath("$[0].text").value("Normal fasting glucose."))
+                .andExpect(jsonPath("$[0].componentId").value("c-9401"));
+    }
+
+    /**
+     * OGC-1024 (R5) — the test's reagent links (Test Catalog) are readable through
+     * the RESULTS-role endpoint, enriched with the inventory item's name and units
+     * so the bench section can render lots and record consumption.
+     */
+    @Test
+    public void testReagentLinks_returnsCatalogLinksWithItemNames() throws Exception {
+        jdbc.update("INSERT INTO clinlims.inventory_item (id, fhir_uuid, name, item_type, units, is_active,"
+                + " last_updated) VALUES (9501, '11111111-1111-1111-1111-111111119501'::uuid, 'Glucose HK Gen.3',"
+                + " 'REAGENT', 'mL', 'Y', NOW())");
+        jdbc.update("INSERT INTO clinlims.test_reagent_link (id, test_id, reagent_id, usage_type, quantity_per_test,"
+                + " quantity_unit, lastupdated) VALUES ('trl-9501', 1, 9501, 'PRIMARY', 1.5, 'mL', NOW())");
+
+        mockMvc.perform(get("/rest/results-entry/test/1/reagents").session(session)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1)).andExpect(jsonPath("$[0].reagentId").value(9501))
+                .andExpect(jsonPath("$[0].name").value("Glucose HK Gen.3"))
+                .andExpect(jsonPath("$[0].units").value("mL")).andExpect(jsonPath("$[0].usageType").value("PRIMARY"))
+                .andExpect(jsonPath("$[0].quantityPerTest").value(1.5));
+
+        mockMvc.perform(get("/rest/results-entry/test/2/reagents").session(session)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
     }
 }

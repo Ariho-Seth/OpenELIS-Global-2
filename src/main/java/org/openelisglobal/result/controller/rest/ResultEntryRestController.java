@@ -47,6 +47,12 @@ import org.openelisglobal.test.beanItems.TestResultItem;
 import org.openelisglobal.test.service.TestSectionService;
 import org.openelisglobal.test.valueholder.TestSection;
 import org.openelisglobal.testalertrule.service.TestAlertEvaluationService;
+import org.openelisglobal.testreagentlink.service.TestReagentLinkService;
+import org.openelisglobal.testreagentlink.valueholder.TestReagentLink;
+import org.openelisglobal.testresultcomponent.service.TestResultComponentService;
+import org.openelisglobal.testresultcomponent.valueholder.TestResultComponent;
+import org.openelisglobal.testresultinterpretation.service.TestResultInterpretationService;
+import org.openelisglobal.testresultinterpretation.valueholder.TestResultInterpretation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -110,6 +116,14 @@ public class ResultEntryRestController extends LogbookResultsBaseController {
     private TestAlertEvaluationService testAlertEvaluationService;
     @Autowired
     private AnalysisTimelineService analysisTimelineService;
+    @Autowired
+    private TestResultComponentService testResultComponentService;
+    @Autowired
+    private TestResultInterpretationService interpretationService;
+    @Autowired
+    private TestReagentLinkService testReagentLinkService;
+    @Autowired
+    private org.openelisglobal.inventory.service.InventoryItemService inventoryItemService;
 
     /**
      * Lab Units the user may enter results for, each carrying its domain so the
@@ -171,6 +185,63 @@ public class ResultEntryRestController extends LogbookResultsBaseController {
         body.put("page", boundedPage);
         body.put("pageSize", boundedPageSize);
         return ResponseEntity.ok(body);
+    }
+
+    /**
+     * OGC-1026 (R7, FR-G1) — the interpretation rule buckets configured on a test's
+     * components (Test Catalog Editor, OGC-949 M7), readable by the Results role.
+     * The catalog editor's own endpoint is ADMIN-only, which would silently hide
+     * the buckets from bench techs.
+     */
+    @GetMapping(value = "test/{testId}/interpretations", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @PreAuthorize("hasRole('RESULTS')")
+    public ResponseEntity<List<Map<String, Object>>> getTestInterpretations(@PathVariable String testId) {
+        List<Map<String, Object>> buckets = new ArrayList<>();
+        for (TestResultComponent component : testResultComponentService.getActiveComponentsByTestId(testId)) {
+            for (TestResultInterpretation interpretation : interpretationService
+                    .getActiveByComponentId(component.getId())) {
+                Map<String, Object> bucket = new HashMap<>();
+                bucket.put("componentId", component.getId());
+                bucket.put("id", interpretation.getId());
+                bucket.put("valueMatch", interpretation.getValueMatch());
+                bucket.put("text", interpretation.getInterpretationText());
+                bucket.put("severity", interpretation.getSeverity());
+                bucket.put("color", interpretation.getColor());
+                bucket.put("displayOrder", interpretation.getDisplayOrder());
+                buckets.add(bucket);
+            }
+        }
+        return ResponseEntity.ok(buckets);
+    }
+
+    /**
+     * OGC-1024 (R5) — the reagents linked to a test (Test Catalog Editor), readable
+     * by the Results role so the bench Reagents &amp; QC section can surface lots
+     * and record consumption. The catalog's own endpoint is ADMIN-only.
+     */
+    @GetMapping(value = "test/{testId}/reagents", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    @PreAuthorize("hasRole('RESULTS')")
+    public ResponseEntity<List<Map<String, Object>>> getTestReagentLinks(@PathVariable String testId) {
+        List<Map<String, Object>> reagents = new ArrayList<>();
+        for (TestReagentLink link : testReagentLinkService.getByTestId(testId)) {
+            Map<String, Object> reagent = new HashMap<>();
+            reagent.put("reagentId", link.getReagentId());
+            reagent.put("usageType", link.getUsageType());
+            reagent.put("quantityPerTest", link.getQuantityPerTest());
+            reagent.put("quantityUnit", link.getQuantityUnit());
+            if (link.getReagentId() != null) {
+                org.openelisglobal.inventory.valueholder.InventoryItem item = inventoryItemService
+                        .get(link.getReagentId());
+                if (item != null) {
+                    reagent.put("name", item.getName());
+                    reagent.put("units", item.getUnits());
+                }
+            }
+            reagents.add(reagent);
+        }
+        return ResponseEntity.ok(reagents);
     }
 
     /**
