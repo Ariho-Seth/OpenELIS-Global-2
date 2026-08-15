@@ -32,7 +32,7 @@ public class SourceOfSample extends BaseObject<String> {
     @Id
     @GeneratedValue(generator = "src_of_sample_seq_gen")
     @GenericGenerator(name = "src_of_sample_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "src_of_sample_seq"))
-    @Type( type="org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType" )
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 

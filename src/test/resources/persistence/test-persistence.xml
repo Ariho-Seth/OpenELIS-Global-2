@@ -208,8 +208,8 @@
         <class>org.openelisglobal.statusofsample.valueholder.StatusOfSample</class>
 
         <!-- SiteInformation entities (migrated from HBM to JPA annotations) -->
-<!--        <class>org.openelisglobal.siteinformation.valueholder.SiteInformation</class>-->
-<!--        <class>org.openelisglobal.siteinformation.valueholder.SiteInformationDomain</class>-->
+        <!-- <class>org.openelisglobal.siteinformation.valueholder.SiteInformation</class> -->
+        <!-- <class>org.openelisglobal.siteinformation.valueholder.SiteInformationDomain</class> -->
 
         <properties>
             <property name="hibernate.ejb.cfgfile"

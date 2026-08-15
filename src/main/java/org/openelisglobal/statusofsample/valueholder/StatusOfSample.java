@@ -31,10 +31,8 @@ import org.openelisglobal.common.valueholder.EnumValueItemImpl;
 @DynamicUpdate
 @Entity
 @Table(name = "STATUS_OF_SAMPLE")
-@AttributeOverrides({
-        @AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED")),
-        @AttributeOverride(name = "nameKey", column = @Column(name = "display_key"))
-})
+@AttributeOverrides({ @AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED")),
+        @AttributeOverride(name = "nameKey", column = @Column(name = "display_key")) })
 public class StatusOfSample extends EnumValueItemImpl {
 
     private static final long serialVersionUID = 1L;
@@ -42,7 +40,7 @@ public class StatusOfSample extends EnumValueItemImpl {
     @Id
     @GeneratedValue(generator = "status_of_sample_seq_gen")
     @GenericGenerator(name = "status_of_sample_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = @org.hibernate.annotations.Parameter(name = "sequence_name", value = "status_of_sample_seq"))
-    @Type( type="org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType" )
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 
@@ -53,7 +51,7 @@ public class StatusOfSample extends EnumValueItemImpl {
     private String statusOfSampleName;
 
     @Column(name = "CODE", length = 3)
-    @Type( type="org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String code;
 
     @Column(name = "STATUS_TYPE", length = 10)
