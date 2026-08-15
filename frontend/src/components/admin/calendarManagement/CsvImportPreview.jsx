@@ -81,6 +81,7 @@ function CsvImportPreview({ year, onClose, onImportComplete }) {
           const errorJson = await response.json();
           errorMessage = errorJson.message || errorMessage;
         } catch (e) {
+            console.log("Error fetching data", e);
           // Fallback if the error response wasn't valid JSON
         }
         throw new Error(errorMessage);
