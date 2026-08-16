@@ -14,6 +14,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openelisglobal.storage.valueholder.*;
+import org.openelisglobal.typeofsample.valueholder.TypeOfSample;
+import org.openelisglobal.unitofmeasure.valueholder.UnitOfMeasure;
 
 /**
  * Validates Hibernate ORM mappings WITHOUT requiring database connection. This
@@ -48,10 +50,10 @@ public class HibernateMappingValidationTest {
         // TypeOfSample depends on Localization (JPA entity)
         configuration.addAnnotatedClass(org.openelisglobal.localization.valueholder.Localization.class);
         configuration.addAnnotatedClass(org.openelisglobal.localization.valueholder.LocalizationValue.class);
+        configuration.addAnnotatedClass(TypeOfSample.class);
+        configuration.addAnnotatedClass(UnitOfMeasure.class);
         configuration.addResource("hibernate/hbm/Sample.hbm.xml");
         configuration.addResource("hibernate/hbm/SampleItem.hbm.xml");
-        configuration.addResource("hibernate/hbm/TypeOfSample.hbm.xml");
-        configuration.addResource("hibernate/hbm/UnitOfMeasure.hbm.xml");
 
         // Configure minimal properties (no actual DB connection)
         configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
