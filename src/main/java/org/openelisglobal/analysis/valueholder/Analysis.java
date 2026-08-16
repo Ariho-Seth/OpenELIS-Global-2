@@ -26,6 +26,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import java.sql.Date;
@@ -242,12 +243,20 @@ public class Analysis extends BaseObject<String> implements NoteObject {
         }
     }
 
-    @JsonSetter
     public void setCompletedDate(Timestamp completedDate) {
         this.completedDate = completedDate;
-        completedDateForDisplay = completedDate != null
-                ? DateUtil.convertSqlDateToStringDate(new Date(completedDate.getTime()))
+        updateCompletedDateForDisplay();
+    }
+
+    private void updateCompletedDateForDisplay() {
+        this.completedDateForDisplay = this.completedDate != null
+                ? DateUtil.convertSqlDateToStringDate(new Date(this.completedDate.getTime()))
                 : null;
+    }
+
+    @PostLoad
+    private void postLoad() {
+        updateCompletedDateForDisplay();
     }
 
     /** @deprecated Use {@link #setCompletedDate(Timestamp)} instead */
