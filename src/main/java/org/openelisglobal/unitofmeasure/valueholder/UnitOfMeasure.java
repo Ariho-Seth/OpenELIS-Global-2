@@ -18,6 +18,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
@@ -65,6 +66,11 @@ public class UnitOfMeasure extends EnumValueItemImpl {
     public void setId(String id) {
         this.id = id;
         this.key = id;
+    }
+
+    @PostLoad
+    private void syncName() {
+        this.name = this.unitOfMeasureName;
     }
 
     public void setUnitOfMeasureName(String unitOfMeasureName) {
