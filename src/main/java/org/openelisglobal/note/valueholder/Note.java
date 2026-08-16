@@ -79,6 +79,14 @@ public class Note extends BaseObject<String> {
     @Column(name = "TEXT")
     private String text;
 
+    /**
+     * OGC-811 (Results Entry v3) — scopes a note to one result component of a
+     * multi-component test. Null means analysis-level (legacy notes and notes
+     * authored outside a component context), which displays on every component row.
+     */
+    @Column(name = "TEST_RESULT_COMPONENT_ID", length = 36)
+    private String testResultComponentId;
+
     public void setReferenceTables(ReferenceTables referenceTables) {
         if (referenceTables != null) {
             setReferenceTableId(referenceTables.getId());

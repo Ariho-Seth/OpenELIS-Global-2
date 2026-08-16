@@ -27,7 +27,6 @@
         <property name="connection.password">${db.pass}</property>
 
         <mapping resource="hibernate/hbm/Action.hbm.xml" />
-        <mapping resource="hibernate/hbm/Analysis.hbm.xml" />
         <mapping resource="hibernate/hbm/AnalysisQaEvent.hbm.xml" />
         <mapping
             resource="hibernate/hbm/AnalysisQaEventAction.hbm.xml" />
@@ -70,8 +69,6 @@
         <mapping resource="hibernate/hbm/SourceOfSample.hbm.xml" />
         <mapping resource="hibernate/hbm/StatusOfSample.hbm.xml" />
         <mapping resource="hibernate/hbm/SystemUser.hbm.xml" />
-        <mapping resource="hibernate/hbm/Test.hbm.xml" />
-        <mapping resource="hibernate/hbm/TestSection.hbm.xml" />
         <mapping resource="hibernate/hbm/RenameTestSection.hbm.xml" />
         <mapping resource="hibernate/hbm/TestAnalyte.hbm.xml" />
         <mapping
@@ -147,6 +144,8 @@
             class="org.openelisglobal.qaevent.valueholder.NceSpecimen" />
         <mapping
             class="org.openelisglobal.qaevent.valueholder.NceAttachment" />
+        <mapping
+            class="org.openelisglobal.sample.attachment.valueholder.OrderAttachment" />
         <mapping
             class="org.openelisglobal.qaevent.valueholder.NceHistory" />
         <mapping

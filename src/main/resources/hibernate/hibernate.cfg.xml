@@ -28,7 +28,6 @@
 
 
         <mapping resource="hibernate/hbm/Action.hbm.xml" />
-        <mapping resource="hibernate/hbm/Analysis.hbm.xml" />
         <mapping resource="hibernate/hbm/AnalysisQaEvent.hbm.xml" />
         <mapping
             resource="hibernate/hbm/AnalysisQaEventAction.hbm.xml" />
@@ -71,8 +70,6 @@
         <mapping resource="hibernate/hbm/SourceOfSample.hbm.xml" />
         <mapping resource="hibernate/hbm/StatusOfSample.hbm.xml" />
         <mapping resource="hibernate/hbm/SystemUser.hbm.xml" />
-        <mapping resource="hibernate/hbm/Test.hbm.xml" />
-        <mapping resource="hibernate/hbm/TestSection.hbm.xml" />
         <mapping resource="hibernate/hbm/RenameTestSection.hbm.xml" />
         <mapping resource="hibernate/hbm/RenameMethod.hbm.xml" />
         <mapping resource="hibernate/hbm/TestAnalyte.hbm.xml" />
