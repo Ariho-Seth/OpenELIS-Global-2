@@ -50,7 +50,8 @@ import MethodCreate from "./testManagementConfigMenu/MethodCreate";
 import TestSectionManagement from "./testManagementConfigMenu/TestSectionManagement";
 import TestSectionCreate from "./testManagementConfigMenu/TestSectionCreate";
 import TestSectionOrder from "./testManagementConfigMenu/TestSectionOrder";
-import SampleTypeManagement from "./sampleTypeManagement/SampleTypeManagement.jsx";
+import SampleTypeEditor from "./sampleTypeManagement/SampleTypeManagement.jsx";
+import LegacySampleTypeManagement from "./testManagementConfigMenu/SampleTypeManagement";
 import TestSectionTestAssign from "./testManagementConfigMenu/TestSectionTestAssign";
 import SampleTypeOrder from "./testManagementConfigMenu/SampleTypeOrder";
 import SampleTypeCreate from "./testManagementConfigMenu/SampleTypeCreate";
@@ -64,6 +65,7 @@ import PanelTestAssign from "./testManagementConfigMenu/PanelTestAssign";
 import TestActivation from "./testManagementConfigMenu/TestActivation";
 import TestRenameEntry from "./testManagementConfigMenu/TestRenameEntry";
 import PanelRenameEntry from "./testManagementConfigMenu/PanelRenameEntry";
+import SampleTypeRenameEntry from "./testManagementConfigMenu/SampleTypeRenameEntry";
 import TestSectionRenameEntry from "./testManagementConfigMenu/TestSectionRenameEntry";
 import UomRenameEntry from "./testManagementConfigMenu/UomRenameEntry";
 import SelectListRenameEntry from "./testManagementConfigMenu/SelectListRenameEntry";
@@ -181,9 +183,17 @@ function Admin() {
         path={`${path}/TestSectionTestAssign`}
         component={TestSectionTestAssign}
       />
+      {/* Manage Sample Types under the legacy Test Management menu keeps opening
+          the legacy page. The new editor answers on its own path so that link,
+          and every other legacy one, is left where it was. */}
       <Route
-        path={`${path}/SampleTypeManagement/:sampleTypeId?/:section?`}
-        component={SampleTypeManagement}
+        path={`${path}/SampleTypeManagement`}
+        exact
+        component={LegacySampleTypeManagement}
+      />
+      <Route
+        path={`${path}/SampleTypeEditor/:sampleTypeId?/:section?`}
+        component={SampleTypeEditor}
       />
       <Route path={`${path}/SampleTypeCreate`} component={SampleTypeCreate} />
       <Route path={`${path}/SampleTypeOrder`} component={SampleTypeOrder} />
@@ -202,6 +212,10 @@ function Admin() {
       <Route path={`${path}/TestActivation`} component={TestActivation} />
       <Route path={`${path}/TestRenameEntry`} component={TestRenameEntry} />
       <Route path={`${path}/PanelRenameEntry`} component={PanelRenameEntry} />
+      <Route
+        path={`${path}/SampleTypeRenameEntry`}
+        component={SampleTypeRenameEntry}
+      />
       <Route
         path={`${path}/TestSectionRenameEntry`}
         component={TestSectionRenameEntry}
