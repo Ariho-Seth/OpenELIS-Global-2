@@ -13,7 +13,17 @@
  */
 package org.openelisglobal.test.valueholder;
 
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.Version;
 import java.sql.Timestamp;
 import java.util.Objects;
 import lombok.Getter;
@@ -140,5 +150,4 @@ public class TestSection extends EnumValueItemImpl {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }

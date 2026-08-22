@@ -182,6 +182,11 @@ public class Analysis extends BaseObject<String> implements NoteObject {
     @JoinColumn(name = "panel_id")
     private Panel panel;
 
+    /** Mutually exclusive with {@link #sampleItem} (DB CHECK constraint). */
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "vector_pool_id", precision = 10, scale = 0)
+    private String vectorPoolId;
+
     @Column(name = "reflex_trigger")
     private Boolean triggeredReflex = false;
 
