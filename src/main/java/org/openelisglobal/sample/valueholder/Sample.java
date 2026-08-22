@@ -78,6 +78,26 @@ public class Sample extends EnumValueItemImpl implements NoteObject {
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String nextItemSequence;
 
+    // S-09 (OGC-580) Resample linkage: original <-> replacement order
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "resampled_from_sample_id", precision = 10)
+    private String resampledFromSampleId;
+
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    @Column(name = "resampled_to_sample_id", precision = 10)
+    private String resampledToSampleId;
+
+    // OGC-776 (S-15e) LHU report-level amendment
+
+    @Column(name = "amends_lhu_number")
+    private String amendsLhuNumber;
+
+    @Column(name = "amendment_number")
+    private Integer amendmentNumber;
+
+    @Column(name = "amendment_reason")
+    private String amendmentReason;
+
     @Column(name = "REVISION", precision = 22, scale = 0)
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String revision;
@@ -111,6 +131,9 @@ public class Sample extends EnumValueItemImpl implements NoteObject {
 
     @Column(name = "CLIENT_REFERENCE", length = 20)
     private String clientReference;
+
+    @Column(name = "required_by")
+    private Timestamp requiredBy;
 
     @Column(name = "STATUS", length = 1)
     private String status;
@@ -243,12 +266,60 @@ public class Sample extends EnumValueItemImpl implements NoteObject {
         collectionTimeForDisplay = DateUtil.convertTimestampToStringTime(collectionDate);
     }
 
+    public Timestamp getRequiredBy() {
+        return requiredBy;
+    }
+
+    public void setRequiredBy(Timestamp requiredBy) {
+        this.requiredBy = requiredBy;
+    }
+
     public String getDomain() {
         return domain;
     }
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getResampledFromSampleId() {
+        return resampledFromSampleId;
+    }
+
+    public void setResampledFromSampleId(String resampledFromSampleId) {
+        this.resampledFromSampleId = resampledFromSampleId;
+    }
+
+    public String getResampledToSampleId() {
+        return resampledToSampleId;
+    }
+
+    public void setResampledToSampleId(String resampledToSampleId) {
+        this.resampledToSampleId = resampledToSampleId;
+    }
+
+    public String getAmendsLhuNumber() {
+        return amendsLhuNumber;
+    }
+
+    public void setAmendsLhuNumber(String amendsLhuNumber) {
+        this.amendsLhuNumber = amendsLhuNumber;
+    }
+
+    public Integer getAmendmentNumber() {
+        return amendmentNumber;
+    }
+
+    public void setAmendmentNumber(Integer amendmentNumber) {
+        this.amendmentNumber = amendmentNumber;
+    }
+
+    public String getAmendmentReason() {
+        return amendmentReason;
+    }
+
+    public void setAmendmentReason(String amendmentReason) {
+        this.amendmentReason = amendmentReason;
     }
 
     public Date getEnteredDate() {

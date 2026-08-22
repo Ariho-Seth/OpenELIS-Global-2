@@ -127,6 +127,18 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
     @Column(name = "specimen_origin")
     private String specimenOrigin;
 
+    @Column(name = "container")
+    private String container;
+
+    @Column(name = "location_details")
+    private String locationDetails;
+
+    @Column(name = "gps_latitude")
+    private String gpsLatitude;
+
+    @Column(name = "gps_longitude")
+    private String gpsLongitude;
+
     @Column(name = "received_date")
     private Timestamp receivedDate;
 
@@ -142,6 +154,15 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
 
     @Column(name = "void_reason")
     private String voidReason;
+
+    private boolean labPerformedSampling = false;
+
+    @Column(name = "collection_location_id")
+    @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
+    private String collectionLocationId;
+
+    @Column(name = "collection_notes", length = 500)
+    private String collectionNotes;
 
     // ========== Aliquoting Support Fields (Feature 001-sample-management)
     // ==========
