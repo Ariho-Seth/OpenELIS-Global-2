@@ -111,6 +111,9 @@ public class Person extends BaseObject<String> {
     @Column(name = "EMAIL")
     private String email;
 
+    @Column(name = "department")
+    private String department;
+
     // OGC-650 (LO-01-01): patient registration GPS coordinates. Toggle-gated by
     // the PATIENT_GPS_CAPTURE_ENABLED config property — only rendered when on.
     @Column(name = "gps_latitude")
