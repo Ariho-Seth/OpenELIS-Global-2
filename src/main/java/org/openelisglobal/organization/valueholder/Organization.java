@@ -16,6 +16,7 @@ package org.openelisglobal.organization.valueholder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +48,18 @@ public class Organization extends EnumValueItemImpl implements SimpleBaseEntity<
     @SafeHtml(level = SafeHtml.SafeListLevel.NONE)
     @Column(name = "CLIA_NUM", length = 12)
     private String cliaNum;
+
+    @Pattern(regexp = ValidationHelper.PHONE_REGEX)
+    @Column(name = "phone", length = 20)
+    private String phone;
+
+    @SafeHtml(level = SafeHtml.SafeListLevel.NONE)
+    @Column(name = "fax", length = 20)
+    private String fax;
+
+    @Email
+    @Column(name = "email", length = 255)
+    private String email;
 
     @Id
     @Pattern(regexp = ValidationHelper.ID_REGEX)
