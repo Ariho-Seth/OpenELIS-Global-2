@@ -2,9 +2,9 @@ package org.openelisglobal.organisation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -197,5 +197,4 @@ public class OrganizationExportServiceTest {
 
         assertNotNull(jsonResult);
     }
-
 }
