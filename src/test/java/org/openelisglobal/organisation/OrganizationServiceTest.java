@@ -2,13 +2,10 @@ package org.openelisglobal.organisation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.junit.Before;
@@ -19,7 +16,6 @@ import org.openelisglobal.common.util.ConfigurationProperties;
 import org.openelisglobal.organization.service.OrganizationService;
 import org.openelisglobal.organization.valueholder.Organization;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 public class OrganizationServiceTest extends BaseWebContextSensitiveTest {
 
@@ -215,18 +211,20 @@ public class OrganizationServiceTest extends BaseWebContextSensitiveTest {
         assertTrue(organizationList.size() > 0);
     }
 
-    @Test
-    @Transactional
-    public void testGenerateSiteCode() {
-        String expectedDatePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
-        String siteCode1 = organisationService.generateSiteCode();
-        String siteCode2 = organisationService.generateSiteCode();
+    /** Method was deleted in the previous commits */
 
-        assertNotNull(siteCode1);
-        assertTrue("Site code should start with 'S' followed by today's date format",
-                siteCode1.startsWith("S" + expectedDatePart + "-"));
-        assertNotEquals("Consecutive site codes must be unique due to sequence increments", siteCode1, siteCode2);
-    }
+//    @Test
+//    @Transactional
+//    public void testGenerateSiteCode() {
+//        String expectedDatePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
+//        String siteCode1 = organisationService.generateSiteCode();
+//        String siteCode2 = organisationService.generateSiteCode();
+//
+//        assertNotNull(siteCode1);
+//        assertTrue("Site code should start with 'S' followed by today's date format",
+//                siteCode1.startsWith("S" + expectedDatePart + "-"));
+//        assertNotEquals("Consecutive site codes must be unique due to sequence increments", siteCode1, siteCode2);
+//    }
 
     @Test
     public void testGetOrganizationByCode() {
