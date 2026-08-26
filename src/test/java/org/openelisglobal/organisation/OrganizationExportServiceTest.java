@@ -2,9 +2,7 @@ package org.openelisglobal.organisation;
 
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -147,6 +145,7 @@ public class OrganizationExportServiceTest {
                 .thenReturn(new org.hl7.fhir.r4.model.Organization());
         when(fhirTransformService.createReferenceFor(any(org.hl7.fhir.r4.model.Organization.class)))
                 .thenReturn(new Reference());
+        when(fhirPersistanceService.makeTransactionBundleForCreate(any())).thenReturn(new Bundle());
 
         when(fhirContext.newJsonParser()).thenReturn(fhirParser);
         when(fhirParser.setPrettyPrint(true)).thenReturn(fhirParser);
@@ -156,6 +155,8 @@ public class OrganizationExportServiceTest {
 
         // Then
         assertNotNull(jsonResult);
+        verify(fhirTransformService, times(1)).createReferenceFor(any(org.hl7.fhir.r4.model.Organization.class));
+        verify(fhirPersistanceService, times(1)).makeTransactionBundleForCreate(any());
         verify(fhirTransformService, times(1)).createReferenceFor(any(org.hl7.fhir.r4.model.Organization.class));
 
     }
@@ -196,5 +197,8 @@ public class OrganizationExportServiceTest {
         String jsonResult = organizationExportService.exportFhirOrganizationsFromOrganizations(true);
 
         assertNotNull(jsonResult);
+        verify(fhirTransformService, atLeastOnce()).transformToFhirOrganization(any());
+        verify(fhirTransformService, atLeastOnce()).createReferenceFor(any(org.hl7.fhir.r4.model.Organization.class));
+        verify(fhirPersistanceService, atLeastOnce()).makeTransactionBundleForCreate(any());
     }
 }

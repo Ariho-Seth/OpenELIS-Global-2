@@ -211,21 +211,6 @@ public class OrganizationServiceTest extends BaseWebContextSensitiveTest {
         assertTrue(organizationList.size() > 0);
     }
 
-    /** Method was deleted in the previous commits */
-
-//    @Test
-//    @Transactional
-//    public void testGenerateSiteCode() {
-//        String expectedDatePart = LocalDate.now().format(DateTimeFormatter.ofPattern("yyMMdd"));
-//        String siteCode1 = organisationService.generateSiteCode();
-//        String siteCode2 = organisationService.generateSiteCode();
-//
-//        assertNotNull(siteCode1);
-//        assertTrue("Site code should start with 'S' followed by today's date format",
-//                siteCode1.startsWith("S" + expectedDatePart + "-"));
-//        assertNotEquals("Consecutive site codes must be unique due to sequence increments", siteCode1, siteCode2);
-//    }
-
     @Test
     public void testGetOrganizationByCode() {
         Organization organization = organisationService.getOrganizationByCode("CHC003");
@@ -318,18 +303,10 @@ public class OrganizationServiceTest extends BaseWebContextSensitiveTest {
     }
 
     @Test
-    public void testDelete_ShouldPerformSoftDeleteAndSetUser() {
-        String orgId = "3";
-        String testUserId = "test_admin_user";
-
-        Organization orgToDelete = new Organization();
-        orgToDelete.setId(orgId);
-        orgToDelete.setSysUserId(testUserId);
-
+    public void testDelete_ShouldPerformSoftDelete() {
+        Organization orgToDelete = organisationService.get("3");
         organisationService.delete(orgToDelete);
-
-        Organization updatedOrg = organisationService.get(orgId);
-
+        Organization updatedOrg = organisationService.get("3");
         assertNotNull("Organization should still exist in the database (soft delete)", updatedOrg.getId());
         assertEquals("The isActive flag should be updated to NO/N", "N", updatedOrg.getIsActive());
     }
