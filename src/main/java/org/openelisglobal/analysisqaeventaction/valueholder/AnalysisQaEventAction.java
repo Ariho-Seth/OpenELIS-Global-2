@@ -62,7 +62,7 @@ public class AnalysisQaEventAction extends BaseObject<String> {
     @JoinColumn(name = "ACTION_ID", nullable = false)
     private Action action;
 
-    @Column(name = "CREATED_DATE", precision = 7, nullable = false)
+    @Column(name = "CREATED_DATE", length = 7, nullable = false)
     private Date createdDate;
 
     @Transient

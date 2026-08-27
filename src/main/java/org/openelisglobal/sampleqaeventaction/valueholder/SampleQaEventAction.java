@@ -51,7 +51,7 @@ import org.openelisglobal.systemuser.valueholder.SystemUser;
 public class SampleQaEventAction extends BaseObject<String> {
 
     @Id
-    @GeneratedValue(generator = "sample_qaevent_action_seq_genr")
+    @GeneratedValue(generator = "sample_qaevent_action_seq_gen")
     @GenericGenerator(name = "sample_qaevent_action_seq_gen", strategy = "org.openelisglobal.hibernate.resources.StringSequenceGenerator", parameters = {
             @Parameter(name = "sequence_name", value = "sample_qaevent_action_seq") })
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")

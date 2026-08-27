@@ -37,34 +37,34 @@ public class CityStateZip extends BaseObject<String> {
     @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 
-    @Column(name = "city", length = 30)
+    @Column(name = "CITY", length = 30)
     private String city;
 
-    @Column(name = "state", length = 2)
+    @Column(name = "STATE", length = 2)
     private String state;
 
-    @Column(name = "zip_code", length = 10)
+    @Column(name = "ZIP_CODE", length = 10)
     private String zipCode;
 
-    @Column(name = "county_fips", length = 3)
+    @Column(name = "COUNTY_FIPS", length = 3)
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String countyFips;
 
-    @Column(name = "county", length = 25)
+    @Column(name = "COUNTY", length = 25)
     private String county;
 
-    @Column(name = "region_id", length = 3)
+    @Column(name = "REGION_ID", length = 3)
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String regionId;
 
-    @Column(name = "region", length = 30)
+    @Column(name = "REGION", length = 30)
     private String region;
 
-    @Column(name = "state_fips", length = 3)
+    @Column(name = "STATE_FIPS", length = 3)
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String stateFips;
 
-    @Column(name = "state_name", length = 30)
+    @Column(name = "STATE_NAME", length = 30)
     private String stateName;
 
     public CityStateZip() {
