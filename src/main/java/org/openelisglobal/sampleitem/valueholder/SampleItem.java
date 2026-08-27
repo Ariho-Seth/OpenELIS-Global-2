@@ -155,6 +155,7 @@ public class SampleItem extends BaseObject<String> implements NoteObject {
     @Column(name = "void_reason")
     private String voidReason;
 
+    @Column(name = "lab_performed_sampling")
     private boolean labPerformedSampling = false;
 
     @Column(name = "collection_location_id")

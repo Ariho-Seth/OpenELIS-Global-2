@@ -13,15 +13,7 @@
  */
 package org.openelisglobal.sampleitem.valueholder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -154,5 +146,16 @@ public class SampleItemAliquotRelationship extends BaseObject<Long> {
                 + (parentSampleItem != null ? parentSampleItem.getId() : "null") + ", childSampleItemId="
                 + (childSampleItem != null ? childSampleItem.getId() : "null") + ", sequenceNumber=" + sequenceNumber
                 + ", quantityTransferred=" + quantityTransferred + ", fhirUuid=" + fhirUuid + '}';
+    }
+
+    @Transient
+    @Override
+    public Timestamp getLastupdated() {
+        return super.getLastupdated();
+    }
+
+    @Override
+    public void setLastupdated(Timestamp lastupdated) {
+        super.setLastupdated(lastupdated);
     }
 }
