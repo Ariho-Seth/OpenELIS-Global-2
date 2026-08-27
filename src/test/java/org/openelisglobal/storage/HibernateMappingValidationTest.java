@@ -15,6 +15,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openelisglobal.storage.valueholder.*;
 import org.openelisglobal.typeofsample.valueholder.TypeOfSample;
+import org.openelisglobal.typeofsample.valueholder.TypeOfSamplePanel;
+import org.openelisglobal.typeoftestresult.valueholder.TypeOfTestResult;
 import org.openelisglobal.unitofmeasure.valueholder.UnitOfMeasure;
 
 /**
@@ -52,6 +54,8 @@ public class HibernateMappingValidationTest {
         configuration.addAnnotatedClass(org.openelisglobal.localization.valueholder.LocalizationValue.class);
         configuration.addAnnotatedClass(TypeOfSample.class);
         configuration.addAnnotatedClass(UnitOfMeasure.class);
+        configuration.addAnnotatedClass(TypeOfSamplePanel.class);
+        configuration.addAnnotatedClass(TypeOfTestResult.class);
         configuration.addResource("hibernate/hbm/Sample.hbm.xml");
         configuration.addResource("hibernate/hbm/SampleItem.hbm.xml");
 
@@ -100,7 +104,8 @@ public class HibernateMappingValidationTest {
     @Test
     public void testStorageEntitiesHaveNoGetterConflicts() {
         Class<?>[] entities = { StorageRoom.class, StorageDevice.class, StorageShelf.class, StorageRack.class,
-                StorageBox.class, SampleStorageAssignment.class, SampleStorageMovement.class };
+                StorageBox.class, SampleStorageAssignment.class, SampleStorageMovement.class, TypeOfSample.class,
+                TypeOfSamplePanel.class, TypeOfTestResult.class, UnitOfMeasure.class };
 
         for (Class<?> entityClass : entities) {
             validateNoGetterConflicts(entityClass);
@@ -166,5 +171,15 @@ public class HibernateMappingValidationTest {
         // This is implicit validation - SessionFactory won't build if types
         // incompatible
         assertNotNull("SessionFactory validates property types", sessionFactory);
+    }
+
+    @Test
+    public void testAllMigratedClassesMappingLoadedSuccessfully() {
+        assertNotNull("TypeOfSample should be registered", sessionFactory.getMetamodel().entity(TypeOfSample.class));
+        assertNotNull("TypeOfSamplePanel should be registered",
+                sessionFactory.getMetamodel().entity(TypeOfSamplePanel.class));
+        assertNotNull("TypeOfTestResult should be registered",
+                sessionFactory.getMetamodel().entity(TypeOfTestResult.class));
+        assertNotNull("UnitOfMeasure should be registered", sessionFactory.getMetamodel().entity(UnitOfMeasure.class));
     }
 }

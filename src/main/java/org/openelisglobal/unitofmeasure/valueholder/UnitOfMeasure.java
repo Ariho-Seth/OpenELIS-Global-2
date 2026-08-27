@@ -19,6 +19,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.PostLoad;
+import jakarta.persistence.PostPersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
@@ -68,8 +69,10 @@ public class UnitOfMeasure extends EnumValueItemImpl {
         this.key = id;
     }
 
+    @PostPersist
     @PostLoad
-    private void syncName() {
+    private void syncEnumFields() {
+        this.key = id;
         this.name = this.unitOfMeasureName;
     }
 

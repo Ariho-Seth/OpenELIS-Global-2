@@ -41,7 +41,7 @@ public class TypeOfTestResult extends BaseObject<String> {
     @Column(name = "ID", precision = 10, scale = 0)
     private String id;
 
-    @Column(name = "DESCRIPTION", length = 1)
+    @Column(name = "DESCRIPTION", length = 20)
     private String description;
 
     @Column(name = "TEST_RESULT_TYPE", length = 1)

@@ -65,6 +65,9 @@ public class TypeOfSample extends BaseObject<String> {
     @Column(name = "WHONET_CODE", length = 5)
     private String whonetCode;
 
+    @Column(name = "display_key", length = 60)
+    private String nameKey;
+
     @Column(name = "disposal_instructions")
     private String disposalInstructions;
 

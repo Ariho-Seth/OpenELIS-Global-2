@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.sql.Timestamp;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
@@ -37,4 +38,13 @@ public class TypeOfSamplePanel extends BaseObject<String> {
     @Type(type = "org.openelisglobal.hibernate.resources.usertype.LIMSStringNumberUserType")
     private String panelId;
 
+    @Transient
+    @Override
+    public Timestamp getLastupdated() {
+        return null;
+    }
+
+    @Override
+    public void setLastupdated(Timestamp lastupdated) {
+    }
 }
