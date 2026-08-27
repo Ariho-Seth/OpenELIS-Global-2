@@ -11,7 +11,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import org.openelisglobal.analyzer.util.NetworkValidationUtil;
+import org.openelisglobal.common.util.NetworkValidationUtil;
 import org.openelisglobal.analyzer.valueholder.Analyzer;
 import org.openelisglobal.analyzer.valueholder.AnalyzerField;
 import org.openelisglobal.common.exception.LIMSRuntimeException;

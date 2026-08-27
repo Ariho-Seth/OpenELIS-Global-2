@@ -1,4 +1,4 @@
-package org.openelisglobal.analyzer.util;
+package org.openelisglobal.common.util;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
