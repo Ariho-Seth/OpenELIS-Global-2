@@ -31,8 +31,7 @@ import org.openelisglobal.common.valueholder.EnumValueItemImpl;
 @DynamicUpdate
 @Entity
 @Table(name = "STATUS_OF_SAMPLE")
-@AttributeOverrides({ @AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED")),
-        @AttributeOverride(name = "nameKey", column = @Column(name = "display_key")) })
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class StatusOfSample extends EnumValueItemImpl {
 
     private static final long serialVersionUID = 1L;
@@ -74,6 +73,16 @@ public class StatusOfSample extends EnumValueItemImpl {
         this.id = id;
         // bugzilla 1625
         this.key = id;
+    }
+
+    @Override
+    public String getNameKey() {
+        return super.getNameKey();
+    }
+
+    @Override
+    public void setNameKey(String nameKey) {
+        super.setNameKey(nameKey);
     }
 
     public String getDefaultLocalizedName() {
