@@ -23,8 +23,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.persistence.Version;
-import java.sql.Timestamp;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,7 +40,7 @@ import org.openelisglobal.test.service.TestSectionService;
 @DynamicUpdate
 @Entity
 @Table(name = "TEST_SECTION")
-@AttributeOverride(name = "nameKey", column = @Column(name = "display_key", length = 60))
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class TestSection extends EnumValueItemImpl {
 
     private static final long serialVersionUID = -1574344492809195601L;
@@ -56,10 +54,6 @@ public class TestSection extends EnumValueItemImpl {
 
     @Column(name = "IS_EXTERNAL", length = 1)
     private String isExternal;
-
-    @Version
-    @Column(name = "LASTUPDATED")
-    private Timestamp lastupdated;
 
     @Column(name = "NAME", length = 20)
     private String testSectionName;
@@ -97,6 +91,19 @@ public class TestSection extends EnumValueItemImpl {
     @Column(name = "DOMAIN", length = 20)
     private String domain = "CLINICAL";
 
+    @Column(name = "display_key", length = 60)
+    private String nameKey;
+
+    @Override
+    public String getNameKey() {
+        return nameKey;
+    }
+
+    @Override
+    public void setNameKey(String nameKey) {
+        this.nameKey = nameKey;
+    }
+
     public TestSection() {
         super();
     }
@@ -109,16 +116,6 @@ public class TestSection extends EnumValueItemImpl {
     @Override
     public void setId(String id) {
         this.id = id;
-    }
-
-    @Override
-    public void setLastupdated(Timestamp lastupdated) {
-        this.lastupdated = lastupdated;
-    }
-
-    @Override
-    public Timestamp getLastupdated() {
-        return lastupdated;
     }
 
     @Override
