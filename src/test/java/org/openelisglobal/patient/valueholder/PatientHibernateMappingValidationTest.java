@@ -186,4 +186,12 @@ public class PatientHibernateMappingValidationTest {
         // incompatible
         assertNotNull("SessionFactory validates property types", sessionFactory);
     }
+
+    @Test
+    public void testPatientAndPersonProductionMappingsLoad() {
+        assertNotNull("SessionFactory should build successfully with production mappings", sessionFactory);
+
+        assertNotNull("Person entity should be registered", sessionFactory.getMetamodel().entity(Person.class));
+        assertNotNull("Patient entity should be registered", sessionFactory.getMetamodel().entity(Patient.class));
+    }
 }
