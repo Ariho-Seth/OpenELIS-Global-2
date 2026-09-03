@@ -16,7 +16,17 @@
 package org.openelisglobal.organization.valueholder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+import jakarta.persistence.AttributeOverride;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
 import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,8 +40,7 @@ import org.openelisglobal.common.valueholder.BaseObject;
 @Entity
 @DynamicUpdate
 @Table(name = "ORGANIZATION_TYPE")
-@AttributeOverrides({ @AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED")),
-        @AttributeOverride(name = "nameKey", column = @Column(name = "name_display_key", length = 60, nullable = true)) })
+@AttributeOverride(name = "lastupdated", column = @Column(name = "LASTUPDATED"))
 public class OrganizationType extends BaseObject<String> {
 
     private static final long serialVersionUID = 1L;
@@ -56,6 +65,19 @@ public class OrganizationType extends BaseObject<String> {
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "organization_organization_type", joinColumns = @JoinColumn(name = "org_type_id"), inverseJoinColumns = @JoinColumn(name = "org_id"))
     private Set<Organization> organizations;
+
+    @Column(name = "name_display_key", length = 60)
+    private String nameKey;
+
+    @Override
+    public String getNameKey() {
+        return nameKey;
+    }
+
+    @Override
+    public void setNameKey(String nameKey) {
+        this.nameKey = nameKey;
+    }
 
     @Override
     protected String getDefaultLocalizedName() {

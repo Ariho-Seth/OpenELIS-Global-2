@@ -109,6 +109,19 @@ public class Project extends BaseObject<String> {
     @JoinTable(name = "project_organization", joinColumns = @JoinColumn(name = "project_id"), inverseJoinColumns = @JoinColumn(name = "org_id"))
     private Set<Organization> organizations;
 
+    @Column(name = "display_key", length = 60)
+    private String nameKey;
+
+    @Override
+    public String getNameKey() {
+        return nameKey;
+    }
+
+    @Override
+    public void setNameKey(String nameKey) {
+        this.nameKey = nameKey;
+    }
+
     public String getConcatProjNameDesc() {
         if (null == this.description) {
             return this.projectName;
