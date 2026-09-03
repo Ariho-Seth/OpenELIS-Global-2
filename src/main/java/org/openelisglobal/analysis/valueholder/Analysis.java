@@ -82,7 +82,7 @@ public class Analysis extends BaseObject<String> implements NoteObject {
     @Column(name = "ANALYSIS_TYPE", length = 10, nullable = false)
     private String analysisType;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TEST_SECT_ID")
     private TestSection testSection;
 
