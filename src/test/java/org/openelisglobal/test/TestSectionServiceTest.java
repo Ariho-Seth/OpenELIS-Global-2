@@ -7,7 +7,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openelisglobal.BaseWebContextSensitiveTest;
+import org.openelisglobal.common.exception.LIMSRuntimeException;
 import org.openelisglobal.common.util.ConfigurationProperties;
+import org.openelisglobal.localization.service.LocalizationService;
+import org.openelisglobal.localization.valueholder.Localization;
 import org.openelisglobal.test.service.TestSectionService;
 import org.openelisglobal.test.valueholder.TestSection;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +19,9 @@ public class TestSectionServiceTest extends BaseWebContextSensitiveTest {
 
     @Autowired
     private TestSectionService testSectionService;
+
+    @Autowired
+    private LocalizationService localizationService;
 
     @Before
     public void setUp() throws Exception {
@@ -131,6 +137,58 @@ public class TestSectionServiceTest extends BaseWebContextSensitiveTest {
         assertNotNull("TestSection should exist", section);
         assertNotNull("nameKey (display_key) must not be null for reports/work plans", section.getNameKey());
         assertEquals("TestKey1", section.getNameKey());
+    public void moveToSortOrderPosition_shouldPlaceSectionAndRenumberDensely() {
+        List<TestSection> ordered = testSectionService.moveToSortOrderPosition("1", 1, "1");
+
+        assertEquals("1", ordered.get(0).getId());
+        for (int i = 0; i < ordered.size(); i++) {
+            assertEquals(i + 1, ordered.get(i).getSortOrderInt());
+        }
+
+        assertEquals(1, testSectionService.getTestSectionById("1").getSortOrderInt());
+        assertEquals(2, testSectionService.getTestSectionById("2").getSortOrderInt());
+    }
+
+    @Test
+    public void moveToSortOrderPosition_shouldClampPositionBeyondEndToLast() {
+        List<TestSection> ordered = testSectionService.moveToSortOrderPosition("2", 99, "1");
+
+        assertEquals("2", ordered.get(ordered.size() - 1).getId());
+        assertEquals(ordered.size(), ordered.get(ordered.size() - 1).getSortOrderInt());
+    }
+
+    @Test
+    public void moveToSortOrderPosition_shouldKeepUserSentinelParkedAtEnd() {
+        Localization localization = new Localization();
+        localization.setDescription("test unit name");
+        localization.setLocalizedValue("en", TestSectionService.USER_SENTINEL_SECTION_NAME);
+        localization.setSysUserId("1");
+        localizationService.insert(localization);
+
+        TestSection sentinel = new TestSection();
+        sentinel.setTestSectionName(TestSectionService.USER_SENTINEL_SECTION_NAME);
+        sentinel.setDescription("orderer chooses the section");
+        sentinel.setIsActive("Y");
+        sentinel.setSortOrderInt(1);
+        sentinel.setLocalization(localization);
+        sentinel.setSysUserId("1");
+        String sentinelId = testSectionService.insert(sentinel);
+
+        List<TestSection> ordered = testSectionService.moveToSortOrderPosition("1", 1, "1");
+
+        for (TestSection section : ordered) {
+            Assert.assertNotEquals(sentinelId, section.getId());
+        }
+        for (int i = 0; i < ordered.size(); i++) {
+            assertEquals(i + 1, ordered.get(i).getSortOrderInt());
+        }
+        assertEquals(Integer.MAX_VALUE, testSectionService.getTestSectionById(sentinelId).getSortOrderInt());
+    }
+
+    @Test
+    public void moveToSortOrderPosition_shouldThrowForUnknownSection() {
+        Assert.assertThrows(LIMSRuntimeException.class,
+                () -> testSectionService.moveToSortOrderPosition("999999", 1, "1"));
     }
 
 }
