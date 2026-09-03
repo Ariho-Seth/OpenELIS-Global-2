@@ -137,6 +137,7 @@ public class TestSectionServiceTest extends BaseWebContextSensitiveTest {
         assertNotNull("TestSection should exist", section);
         assertNotNull("nameKey (display_key) must not be null for reports/work plans", section.getNameKey());
         assertEquals("TestKey1", section.getNameKey());
+    }
     public void moveToSortOrderPosition_shouldPlaceSectionAndRenumberDensely() {
         List<TestSection> ordered = testSectionService.moveToSortOrderPosition("1", 1, "1");
 
