@@ -32,6 +32,7 @@ import {
   filterTriaged,
   triageRows,
 } from "./validationTriage";
+import ValidationReviewPanel from "./ValidationReviewPanel";
 
 const Validation = (props) => {
   const componentMounted = useRef(false);
@@ -188,14 +189,6 @@ const Validation = (props) => {
       width: "8rem",
     },
     {
-      id: "notes",
-      name: intl.formatMessage({ id: "column.name.notes" }),
-      cell: (row, index, column, id) => {
-        return renderCell(row, index, column, id);
-      },
-      width: "15rem",
-    },
-    {
       id: "pastNotes",
       name: intl.formatMessage({ id: "column.name.pastNotes" }),
       cell: (row, index, column, id) => {
@@ -269,6 +262,22 @@ const Validation = (props) => {
       message: message,
     });
     setNotificationVisible(true);
+  };
+
+  /**
+   * OGC-1028 — a per-row action (release / modify) succeeded: reload the queue
+   * the same way the batch save does so the row's new state is served fresh.
+   */
+  const handleRowActionDone = (outcome) => {
+    addNotification({
+      kind: NotificationKinds.success,
+      title: intl.formatMessage({ id: "notification.title" }),
+      message: intl.formatMessage({
+        id: `label.validation.review.success.${outcome}`,
+      }),
+    });
+    setNotificationVisible(true);
+    window.location.assign("/validation" + props.params);
   };
 
   /**
@@ -346,6 +355,18 @@ const Validation = (props) => {
   const handleAutomatedCheck = (checked, name) => {
     let form = props.results;
     jpSet(form, name, checked);
+  };
+
+  /**
+   * OGC-1028 — the review panel's composer is the single note input for a row.
+   * It writes the note, its visibility and the Validation context onto the row
+   * so the legacy batch release (bottom Validate button) carries it too.
+   */
+  const handleRowNoteChange = (rowId, note, noteVisibility) => {
+    let form = props.results;
+    jpSet(form, "resultList[" + rowId + "].note", note);
+    jpSet(form, "resultList[" + rowId + "].noteVisibility", noteVisibility);
+    jpSet(form, "resultList[" + rowId + "].noteContext", "VALIDATION");
   };
   const validateResults = (e, rowId) => {
     handleChange(e, rowId);
@@ -525,23 +546,6 @@ const Validation = (props) => {
                 />
               )}
             </Field>
-          </>
-        );
-
-      case "notes":
-        return (
-          <>
-            <div className="note">
-              <TextArea
-                id={"resultList" + row.id + ".note"}
-                name={"resultList[" + row.id + "].note"}
-                disabled={false}
-                type="text"
-                labelText=""
-                rows={2}
-                onChange={(e) => handleChange(e, row.id)}
-              ></TextArea>
-            </div>
           </>
         );
 
@@ -760,6 +764,20 @@ const Validation = (props) => {
               data={visibleRows.slice((page - 1) * pageSize, page * pageSize)}
               columns={columns}
               isSortable
+              expandableRows
+              expandableRowsComponent={ValidationReviewPanel}
+              expandableRowsComponentProps={{
+                rows: props.results?.resultList || [],
+                triageByRowId,
+                configurationProperties,
+                qcAck: {
+                  required: qcAckRequired,
+                  satisfied: qcAckSatisfied,
+                  beforeSign: handleBeforeSign,
+                },
+                onActionDone: handleRowActionDone,
+                onNoteChange: handleRowNoteChange,
+              }}
             ></DataTable>
             <Pagination
               onChange={handlePageChange}
