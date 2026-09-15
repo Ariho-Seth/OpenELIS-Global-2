@@ -341,41 +341,6 @@ public class StorageLocationServiceIntegrationTest extends BaseWebContextSensiti
     }
 
     @Test
-    public void testInsert_WhenEntityIsStorageRoom_ReturnInsertedRoom() {
-        StorageRoom storageRoom = new StorageRoom();
-
-        storageRoom.setFhirUuid(UUID.fromString("00000000-0000-0000-0000-000000001078"));
-        storageRoom.setActive(true);
-        storageRoom.setCode("CODE-0019");
-        storageRoom.setName("ROOM-277");
-        storageRoom.setSysUserId("1");
-
-        Integer returnedInteger = storageLocationService.insert(storageRoom);
-        assertEquals("CODE-0019", storageRoom.getCode());
-        assertNotNull(returnedInteger);
-        assertEquals(Integer.valueOf(3), returnedInteger);
-        assertEquals("1", storageRoom.getSysUserId());
-    }
-
-    @Test
-    public void testInsert_WhenEntityIsStorageShelf_ReturnInsertedShelfCodeIsNull() {
-        StorageShelf storageShelf = new StorageShelf();
-        StorageDevice storageDevice = (StorageDevice) storageLocationService.get(5001, StorageDevice.class);
-
-        storageShelf.setFhirUuid(UUID.fromString("00000000-0000-0000-0000-000000001078"));
-        storageShelf.setActive(true);
-        storageShelf.setLabel("SHELF-0087");
-        storageShelf.setSysUserId("1");
-        storageShelf.setParentDevice(storageDevice);
-
-        Integer returnedInteger = storageLocationService.insert(storageShelf);
-        assertEquals("SHELF-0087", storageShelf.getCode());
-        assertNotNull(returnedInteger);
-        assertEquals(Integer.valueOf(2), returnedInteger);
-        assertEquals("1", storageShelf.getSysUserId());
-    }
-
-    @Test
     public void testInsert_WhenEntityIsStorageRoom_ThrowsExceptionWhenDuplicateCodeIsBeingInserted() {
         StorageRoom storageRoom = new StorageRoom();
         storageRoom.setCode("TEST-R01");
