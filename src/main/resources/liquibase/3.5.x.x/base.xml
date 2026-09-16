@@ -537,4 +537,8 @@
        into the days-outstanding buckets or the stuck view. -->
   <include relativeToChangelogFile="true" file="102-referral-sent-date-backfill.xml"/>
 
+  <!-- QC targets per control level and lot, plus LOD/LOQ on result components
+       (Test Catalog, OGC-1148). -->
+  <include relativeToChangelogFile="true" file="102-test-qc-targets.xml"/>
+
 </databaseChangeLog>
