@@ -3,9 +3,11 @@ package org.openelisglobal.inventory.service;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.openelisglobal.common.exception.LocalizedValidationException;
 import org.openelisglobal.common.service.AuditableBaseObjectServiceImpl;
+import org.openelisglobal.common.util.CodeGenerator;
 import org.openelisglobal.inventory.dao.InventoryLotDAO;
 import org.openelisglobal.inventory.valueholder.InventoryEnums.LotStatus;
 import org.openelisglobal.inventory.valueholder.InventoryEnums.QCStatus;
@@ -19,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class InventoryLotServiceImpl extends AuditableBaseObjectServiceImpl<InventoryLot, Long>
         implements InventoryLotService {
+
+    // Matches the inventory_lot.barcode column length.
+    private static final int BARCODE_MAX_LENGTH = 100;
 
     @Autowired
     private InventoryLotDAO inventoryLotDAO;
@@ -38,15 +43,30 @@ public class InventoryLotServiceImpl extends AuditableBaseObjectServiceImpl<Inve
     @Override
     @Transactional
     public Long insert(InventoryLot lot) {
-        normalizeBarcode(lot);
+        lot.setBarcode(resolveBarcode(lot));
         return super.insert(lot);
     }
 
+    // Minting a replacement here would orphan the label already printed.
     @Override
     @Transactional
     public InventoryLot update(InventoryLot lot) {
         normalizeBarcode(lot);
         return super.update(lot);
+    }
+
+    /**
+     * The lot barcode is the lab's own scannable label, so insert mints one from
+     * the item code and lot number when the user supplies none.
+     */
+    private String resolveBarcode(InventoryLot lot) {
+        String supplied = lot.getBarcode();
+        if (supplied == null || supplied.trim().isEmpty()) {
+            return CodeGenerator.generateFromName(barcodeSeed(lot), BARCODE_MAX_LENGTH, "LOT", this::barcodeExists);
+        }
+        String barcode = CodeGenerator.normalize(supplied, BARCODE_MAX_LENGTH);
+        rejectIfHeldByAnotherLot(barcode, lot.getId());
+        return barcode;
     }
 
     // barcode is UNIQUE and nullable: '' would make barcode-less lots collide.
@@ -56,9 +76,28 @@ public class InventoryLotServiceImpl extends AuditableBaseObjectServiceImpl<Inve
             lot.setBarcode(null);
             return;
         }
+        if (isFirstBarcode(lot)) {
+            barcode = CodeGenerator.normalize(barcode, BARCODE_MAX_LENGTH);
+        }
         lot.setBarcode(barcode);
+        rejectIfHeldByAnotherLot(barcode, lot.getId());
+    }
+
+    /**
+     * True when the stored row carries no barcode, so update reshapes a first
+     * assignment the way insert does and leaves every later save alone.
+     */
+    private boolean isFirstBarcode(InventoryLot lot) {
+        if (lot.getId() == null) {
+            return true;
+        }
+        String stored = inventoryLotDAO.get(lot.getId()).map(InventoryLot::getBarcode).orElse(null);
+        return stored == null || stored.trim().isEmpty();
+    }
+
+    private void rejectIfHeldByAnotherLot(String barcode, Long lotId) {
         InventoryLot holder = inventoryLotDAO.getByBarcode(barcode);
-        if (holder != null && !holder.getId().equals(lot.getId())) {
+        if (holder != null && !holder.getId().equals(lotId)) {
             throw new LocalizedValidationException("inventory.lot.error.duplicateBarcode",
                     "Barcode " + barcode + " is already assigned to lot " + holder.getLotNumber(),
                     Map.of("barcode", barcode, "lotNumber", holder.getLotNumber()));
@@ -69,6 +108,37 @@ public class InventoryLotServiceImpl extends AuditableBaseObjectServiceImpl<Inve
     @Transactional
     public InventoryLot getForUpdate(Long lotId) {
         return inventoryLotDAO.getForUpdate(lotId);
+    }
+
+    /**
+     * Item code plus lot number, so a human can still identify the lot when the
+     * printed barcode is damaged; falls back to whichever half is present.
+     */
+    private String barcodeSeed(InventoryLot lot) {
+        String itemCode = lot.getInventoryItem() != null ? lot.getInventoryItem().getCode() : null;
+        String lotNumber = lot.getLotNumber();
+        if (itemCode == null || itemCode.trim().isEmpty()) {
+            return lotNumber;
+        }
+        if (lotNumber == null || lotNumber.trim().isEmpty()) {
+            return itemCode;
+        }
+        // A lot number generated from the item code must not be prefixed again.
+        if (toComparable(lotNumber).startsWith(toComparable(itemCode))) {
+            return lotNumber;
+        }
+        return itemCode + "-" + lotNumber;
+    }
+
+    /**
+     * Same shape CodeGenerator applies, so prefix check and lookup see final form.
+     */
+    private static String toComparable(String value) {
+        return value.trim().toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]+", "-").replaceAll("^-+|-+$", "");
+    }
+
+    private boolean barcodeExists(String barcode) {
+        return inventoryLotDAO.getByBarcode(barcode) != null;
     }
 
     @Override
@@ -99,6 +169,21 @@ public class InventoryLotServiceImpl extends AuditableBaseObjectServiceImpl<Inve
     @Transactional(readOnly = true)
     public InventoryLot getByLotNumber(String lotNumber) {
         return inventoryLotDAO.getByLotNumber(lotNumber);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public InventoryLot getByBarcode(String barcode) {
+        if (barcode == null || barcode.trim().isEmpty()) {
+            return null;
+        }
+        InventoryLot exact = inventoryLotDAO.getByBarcode(barcode.trim());
+        if (exact != null) {
+            return exact;
+        }
+        // Retry rather than replace: older rows need not be upper-kebab.
+        String normalized = toComparable(barcode);
+        return normalized.isEmpty() ? null : inventoryLotDAO.getByBarcode(normalized);
     }
 
     @Override

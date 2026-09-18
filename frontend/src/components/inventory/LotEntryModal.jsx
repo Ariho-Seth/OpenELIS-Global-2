@@ -230,6 +230,10 @@ const LotEntryModal = ({ open, onClose, onSave, lot = null }) => {
         });
         lotId = savedLot?.id ?? null;
         setCreatedLotId(lotId);
+        // The field locks here, so show the barcode the server minted, not a blank.
+        if (savedLot?.barcode) {
+          setFormData((prev) => ({ ...prev, barcode: savedLot.barcode }));
+        }
       }
 
       if (pendingAssignment && lotId !== null) {
@@ -325,6 +329,10 @@ const LotEntryModal = ({ open, onClose, onSave, lot = null }) => {
   // After a partial create (lot committed, assignment rejected) only the
   // assignment is retried, so edits to the lot fields would not be sent.
   const lotFieldsLocked = createdLotId !== null;
+
+  // The server only protects a barcode it already stored, so a lot without
+  // one stays editable.
+  const barcodeLocked = (isEdit && !!lot.barcode) || lotFieldsLocked;
 
   const locationSummary = isEdit
     ? currentLocation?.hierarchicalPath || ""
@@ -517,9 +525,24 @@ const LotEntryModal = ({ open, onClose, onSave, lot = null }) => {
             id="barcode"
             labelText={<FormattedMessage id="lot.barcode" />}
             value={formData.barcode}
+            disabled={barcodeLocked}
             onChange={(e) => handleChange("barcode", e.target.value)}
-            placeholder="Optional"
-            disabled={lotFieldsLocked}
+            placeholder={
+              barcodeLocked
+                ? ""
+                : intl.formatMessage({
+                    id: isEdit
+                      ? "lot.barcode.placeholder.assign"
+                      : "lot.barcode.placeholder",
+                  })
+            }
+            helperText={intl.formatMessage({
+              id: barcodeLocked
+                ? "lot.barcode.locked"
+                : isEdit
+                  ? "lot.barcode.assign"
+                  : "lot.barcode.hint",
+            })}
           />
         </Stack>
       </Modal>

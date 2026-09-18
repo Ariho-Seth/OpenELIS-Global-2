@@ -390,6 +390,7 @@ const InventoryDashboard = ({ active = true }) => {
         const item = items[lot.inventoryItem?.id];
         return (
           lot.lotNumber?.toLowerCase().includes(searchLower) ||
+          lot.barcode?.toLowerCase().includes(searchLower) ||
           item?.name?.toLowerCase().includes(searchLower)
         );
       });
@@ -515,6 +516,27 @@ const InventoryDashboard = ({ active = true }) => {
     setLocationPickerOpen(true);
   };
 
+  const handlePrintLabel = async (lot) => {
+    try {
+      const response = await InventoryLotAPI.printLabel(lot.id);
+      const blob = new Blob([response.data], { type: response.contentType });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = response.filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      notify({
+        kind: NotificationKinds.error,
+        title: intl.formatMessage({ id: "notification.error" }),
+        message: intl.formatMessage({ id: "lot.label.print.failed" }),
+      });
+    }
+  };
+
   const movingLotCurrentLocation = movingLot?.location?.hierarchicalPath
     ? {
         selection: {},
@@ -631,7 +653,7 @@ const InventoryDashboard = ({ active = true }) => {
               <TableToolbarContent>
                 <TableToolbarSearch
                   placeholder={intl.formatMessage({
-                    id: "inventory.search.placeholder",
+                    id: "inventory.lot.search.placeholder",
                   })}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   value={searchTerm}
@@ -816,6 +838,13 @@ const InventoryDashboard = ({ active = true }) => {
                                         : "Assign storage location",
                                     })}
                                     onClick={() => handleMoveLocation(lot)}
+                                  />
+                                  <OverflowMenuItem
+                                    itemText={intl.formatMessage({
+                                      id: "lot.label.print",
+                                    })}
+                                    disabled={!lot.barcode}
+                                    onClick={() => handlePrintLabel(lot)}
                                   />
                                   <OverflowMenuItem
                                     itemText={intl.formatMessage({

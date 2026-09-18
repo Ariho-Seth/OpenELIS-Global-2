@@ -290,6 +290,30 @@ describe("LotEntryModal — partial save recovery", () => {
     expect(InventoryLotStorageAPI.assignLocation).toHaveBeenCalledTimes(2);
   });
 
+  it("shows the barcode the server minted rather than a blank locked field", async () => {
+    InventoryManagementAPI.receive.mockResolvedValue({
+      id: 79,
+      barcode: "MALARIA-RDT-LOT-1",
+    });
+    InventoryLotStorageAPI.assignLocation.mockRejectedValue(
+      new Error("Position A1 is already occupied"),
+    );
+
+    renderWithIntl(
+      <LotEntryModal open onClose={vi.fn()} onSave={vi.fn()} lot={null} />,
+    );
+    await fillRequiredFieldsExceptLocation();
+
+    fireEvent.click(screen.getByText(/assign storage location/i));
+    fireEvent.click(await screen.findByText("mock-confirm-location"));
+    fireEvent.click(screen.getByText("Save"));
+    await screen.findByText(/the lot was created, but assigning/i);
+
+    const barcode = document.getElementById("barcode");
+    expect(barcode).toBeDisabled();
+    expect(barcode).toHaveValue("MALARIA-RDT-LOT-1");
+  });
+
   it("refreshes the caller's list on close when a lot was already committed", async () => {
     InventoryManagementAPI.receive.mockResolvedValue({ id: 78 });
     InventoryLotStorageAPI.assignLocation.mockRejectedValue(
@@ -362,5 +386,112 @@ describe("LotEntryModal — translated server refusals", () => {
     expect(
       screen.queryByText("Barcode ABC is already assigned to lot LOT-9"),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("LotEntryModal — system-generated barcode", () => {
+  it("sends null when the barcode is left blank so the server generates one", async () => {
+    InventoryManagementAPI.receive.mockResolvedValue({ id: 77 });
+    InventoryLotStorageAPI.assignLocation.mockResolvedValue({
+      assignmentId: "1",
+    });
+    renderWithIntl(<LotEntryModal open onClose={vi.fn()} onSave={vi.fn()} />);
+
+    await fillRequiredFieldsExceptLocation();
+    fireEvent.click(screen.getByText(/assign storage location/i));
+    fireEvent.click(await screen.findByText("mock-confirm-location"));
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => {
+      expect(InventoryManagementAPI.receive).toHaveBeenCalledWith(
+        expect.objectContaining({ barcode: null }),
+      );
+    });
+  });
+
+  it("offers auto-generation when creating", () => {
+    renderWithIntl(<LotEntryModal open onClose={vi.fn()} onSave={vi.fn()} />);
+
+    const barcode = screen.getByLabelText(/barcode/i);
+    expect(barcode).toBeEnabled();
+    expect(
+      screen.getByText(/leave blank to generate one/i),
+    ).toBeInTheDocument();
+  });
+
+  it("locks the barcode once the lot is saved", () => {
+    const lot = {
+      id: 12,
+      inventoryItem: { id: "MALARIA_RDT" },
+      lotNumber: "LOT-12",
+      barcode: "TEST-REAGENT-A-LOT-12",
+      currentQuantity: 4,
+      status: "ACTIVE",
+      qcStatus: "PENDING",
+    };
+    renderWithIntl(
+      <LotEntryModal open onClose={vi.fn()} onSave={vi.fn()} lot={lot} />,
+    );
+
+    const barcode = screen.getByLabelText(/barcode/i);
+    expect(barcode).toHaveValue("TEST-REAGENT-A-LOT-12");
+    expect(barcode).toBeDisabled();
+    expect(
+      screen.getByText(/barcode is locked once saved/i),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("LotEntryModal — barcode on a lot that has none", () => {
+  const barcodelessLot = {
+    id: 13,
+    inventoryItem: { id: "MALARIA_RDT" },
+    lotNumber: "LOT-13",
+    barcode: null,
+    currentQuantity: 4,
+    status: "ACTIVE",
+    qcStatus: "PENDING",
+  };
+
+  it("lets an operator give an existing lot its first barcode", () => {
+    renderWithIntl(
+      <LotEntryModal
+        open
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        lot={barcodelessLot}
+      />,
+    );
+
+    const barcode = screen.getByLabelText(/barcode/i);
+    expect(barcode).toBeEnabled();
+    expect(screen.getByText(/has no barcode yet/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/barcode is locked once saved/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("sends the barcode typed on a barcodeless lot to the server", async () => {
+    InventoryLotAPI.update.mockResolvedValue({});
+    renderWithIntl(
+      <LotEntryModal
+        open
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+        lot={barcodelessLot}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/barcode/i), {
+      target: { value: "BC-GIVEN-13" },
+    });
+    fireEvent.click(screen.getByText("Save"));
+
+    await waitFor(() => {
+      expect(InventoryLotAPI.update).toHaveBeenCalledWith(
+        13,
+        expect.objectContaining({ barcode: "BC-GIVEN-13" }),
+      );
+    });
   });
 });
