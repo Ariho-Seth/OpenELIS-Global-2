@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useRef,
+} from "react";
 import {
   Modal,
   TextInput,
@@ -17,8 +23,8 @@ import { InventoryItemAPI } from "./InventoryService";
 const toCode = (value) =>
   value
     .toUpperCase()
-    .replace(/[^A-Z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+    .replace(/[^A-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 
 const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
   const intl = useIntl();
@@ -54,6 +60,14 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
 
   const [saving, setSaving] = useState(false);
   const normalizedCode = toCode(formData.code);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const [error, setError] = useState(null);
   const [itemTypes, setItemTypes] = useState([]);
 
@@ -62,6 +76,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
     const loadItemTypes = async () => {
       try {
         const types = await InventoryItemAPI.getItemTypes();
+        if (!isMountedRef.current) return;
         const formattedTypes = types.map((type) => ({
           id: type,
           text: getItemTypeLabel(type),
@@ -164,9 +179,16 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
       return false;
     }
 
-    // Type-specific validation
-    if (formData.itemType === "REAGENT" && !formData.stabilityAfterOpening) {
-      setError("Stability after opening is required for reagents");
+    // Only on create: legacy reagents have NULL stability and must stay
+    // editable without the operator inventing a value.
+    if (
+      !isEdit &&
+      formData.itemType === "REAGENT" &&
+      !formData.stabilityAfterOpening
+    ) {
+      setError(
+        intl.formatMessage({ id: "catalog.item.error.stabilityRequired" }),
+      );
       return false;
     }
 
@@ -206,8 +228,9 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
 
       // Add type-specific fields only for relevant item types
       if (formData.itemType === "REAGENT") {
+        // The entity is @Min(1), so an unset value has to go as null, not 0.
         sanitizedData.stabilityAfterOpening =
-          Number(formData.stabilityAfterOpening) || 0;
+          Number(formData.stabilityAfterOpening) || null;
         sanitizedData.storageRequirements = formData.storageRequirements;
       } else if (formData.itemType === "CARTRIDGE") {
         sanitizedData.compatibleAnalyzers = formData.compatibleAnalyzers;
@@ -222,6 +245,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
         sanitizedData.code = toCode(formData.code) || null;
         await InventoryItemAPI.create(sanitizedData);
       }
+      if (!isMountedRef.current) return;
       setSaving(false);
       onSave();
     } catch (err) {
@@ -231,6 +255,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
         ? intl.formatMessage({ id: err.errorCode }, err.params)
         : err.message ||
           intl.formatMessage({ id: "catalog.item.error.saveGeneric" });
+      if (!isMountedRef.current) return;
       setError(errorMessage);
       setSaving(false);
       notify({
@@ -302,7 +327,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
                 : intl.formatMessage({
                     id: "catalog.item.code.hint",
                     defaultMessage:
-                      "Stable identifier used by integrations. Leave blank and we'll generate one from the name.",
+                      "Stable identifier used by integrations. Leave blank and we'll generate one from the name, like PAR-500MG-001.",
                   })
           }
           maxLength={64}
@@ -315,7 +340,9 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
           label="Select item type"
           items={itemTypes}
           itemToString={(item) => (item ? item.text : "")}
-          selectedItem={itemTypes.find((t) => t.id === formData.itemType)}
+          selectedItem={
+            itemTypes.find((t) => t.id === formData.itemType) ?? null
+          }
           onChange={({ selectedItem }) =>
             handleChange("itemType", selectedItem.id)
           }

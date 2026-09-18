@@ -96,11 +96,16 @@ const put = (endpoint, data) => {
                   .join(", ");
                 throw new Error(errorMessages);
               }
-              throw new Error(
+              const err = new Error(
                 errorJson.message ||
                   errorJson.error ||
                   `Failed to update: HTTP ${response.status}`,
               );
+              // Same translated-error body as post(); the catch below rethrows this
+              // object, so the fields survive.
+              err.errorCode = errorJson.errorCode;
+              err.params = errorJson.params;
+              throw err;
             })
             .catch((e) => {
               if (e.message && !e.message.includes("HTTP")) {
@@ -136,26 +141,13 @@ export const InventoryItemAPI = {
     return get(`/items/all${query ? `?${query}` : ""}`);
   },
 
-  // Get only active items
-  getAllActive: () => get("/items"),
-
   // Get item by ID
   getById: (id) => get(`/items/${id}`),
 
   // Get all item types
   getItemTypes: () => get("/items/types"),
 
-  // Get items by type
-  getByType: (itemType) => get(`/items/type/${itemType}`),
-
-  // Search items by name
-  search: (query) => get(`/items/search?query=${encodeURIComponent(query)}`),
-
-  // Get low stock items
   getLowStock: () => get("/items/low-stock"),
-
-  // Get stock level for an item
-  getStockLevel: (itemId) => get(`/items/${itemId}/stock`),
 
   // Create new item
   create: (item) => post("/items", item),
@@ -174,39 +166,11 @@ export const InventoryItemAPI = {
  * Inventory Lot API
  */
 export const InventoryLotAPI = {
-  // Get all lots with optional filters
-  getAll: (filters = {}) => {
-    const params = new URLSearchParams();
-    if (filters.status) params.append("status", filters.status);
-    if (filters.itemId) params.append("itemId", filters.itemId);
-    const query = params.toString();
-    return get(`/lots${query ? `?${query}` : ""}`);
-  },
-
-  // Get lot by ID
-  getById: (id) => get(`/lots/${id}`),
-
-  // Get available lots for an item (FEFO sorted)
-  getAvailableByItem: (itemId) => get(`/lots/item/${itemId}/available`),
-
-  // Get all lots for an item
-  getByItem: (itemId) => get(`/lots/item/${itemId}`),
-
-  // Get expiring lots
-  getExpiring: (days = 30) => get(`/lots/expiring?days=${days}`),
-
-  // Get expired lots
-  getExpired: () => get("/lots/expired"),
-
-  // Create new lot
-  create: (lot) => post("/lots", lot),
+  // GET /lots takes no filters; the dashboard filters client-side.
+  getAll: () => get("/lots"),
 
   // Update lot
   update: (id, lot) => put(`/lots/${id}`, lot),
-
-  // Open lot (for reagents with stability tracking)
-  open: (id, openedDate) =>
-    post(`/lots/${id}/open`, { openedDate: openedDate || new Date() }),
 
   // Update QC status
   updateQCStatus: (id, qcStatus, notes) =>
@@ -219,9 +183,6 @@ export const InventoryLotAPI = {
   // Dispose lot
   dispose: (id, reason, notes) =>
     post(`/lots/${id}/dispose`, { reason, notes }),
-
-  // Process expired lots (batch operation)
-  processExpired: () => post("/lots/process-expired", {}),
 };
 
 /**
@@ -233,14 +194,6 @@ export const InventoryManagementAPI = {
 
   // Receive new inventory
   receive: (receiveData) => post("/management/receive", receiveData),
-
-  // Check availability
-  checkAvailability: (itemId, quantity) =>
-    get(`/management/check-availability?itemId=${itemId}&quantity=${quantity}`),
-
-  // Get inventory alerts (low stock, expiring, expired)
-  getAlerts: (expirationWarningDays = 30) =>
-    get(`/management/alerts?expirationWarningDays=${expirationWarningDays}`),
 };
 
 /**
@@ -256,7 +209,7 @@ export const InventoryLotStorageAPI = {
   getLocation: (lotId) =>
     promisify(getFromOpenElisServer, `${STORAGE_BASE_PATH}/${lotId}`),
 
-  // List movement-audit rows for a lot
+  // Movement-audit rows for a lot (LotDetailsPanel's Movement History)
   getMovements: (lotId) =>
     promisify(getFromOpenElisServer, `${STORAGE_BASE_PATH}/${lotId}/movements`),
 
@@ -311,41 +264,16 @@ export const InventoryLotStorageAPI = {
  * Transaction API
  */
 export const TransactionAPI = {
-  // Get transaction by ID
-  getById: (id) => get(`/transactions/${id}`),
-
   // Get transactions for a lot
   getByLot: (lotId) => get(`/transactions/lot/${lotId}`),
-
-  // Get transactions by type
-  getByType: (transactionType) => get(`/transactions/type/${transactionType}`),
-
-  // Get transactions by date range
-  getByDateRange: (startDate, endDate) =>
-    get(`/transactions/date-range?startDate=${startDate}&endDate=${endDate}`),
-
-  // Get transactions by reference (test result, etc.)
-  getByReference: (referenceId, referenceType) =>
-    get(
-      `/transactions/reference?referenceId=${referenceId}&referenceType=${referenceType}`,
-    ),
 };
 
 /**
  * Usage API (test result linkage)
  */
 export const UsageAPI = {
-  // Get usage by test result ID
-  getByTestResult: (testResultId) => get(`/usage/test-result/${testResultId}`),
-
   // Get usage by lot ID
   getByLot: (lotId) => get(`/usage/lot/${lotId}`),
-
-  // Get usage by item ID
-  getByItem: (itemId) => get(`/usage/item/${itemId}`),
-
-  // Get usage by analysis ID
-  getByAnalysis: (analysisId) => get(`/usage/analysis/${analysisId}`),
 };
 
 /**

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import { waitFor } from "@testing-library/dom";
 import "@testing-library/jest-dom";
 import { IntlProvider } from "react-intl";
@@ -17,6 +17,7 @@ vi.mock("./InventoryService", () => ({
     getAll: vi.fn(),
     getById: vi.fn(),
     getItemTypes: vi.fn(),
+    getLowStock: vi.fn(),
   },
   InventoryLotAPI: {
     getAll: vi.fn(),
@@ -50,6 +51,7 @@ vi.mock("../storage/LocationPicker/LocationPickerModal", () => ({
           onConfirm({
             selection: { room: { id: 9, name: "Cold Room" } },
             position: null,
+            reason: "Consolidating stock",
             notes: "",
           })
         }
@@ -80,6 +82,7 @@ const lotWithLocation = {
   id: 1,
   lotNumber: "LOT-100",
   status: "ACTIVE",
+  qcStatus: "PASSED",
   currentQuantity: 10,
   inventoryItem: { id: "MALARIA_RDT" },
   location: {
@@ -92,6 +95,7 @@ const lotWithoutLocation = {
   id: 2,
   lotNumber: "LOT-200",
   status: "ACTIVE",
+  qcStatus: "PASSED",
   currentQuantity: 3,
   inventoryItem: { id: "MALARIA_RDT" },
   location: null,
@@ -99,17 +103,202 @@ const lotWithoutLocation = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  InventoryItemAPI.getById.mockResolvedValue({
+  const malariaRdt = {
     id: "MALARIA_RDT",
     name: "Malaria RDT",
     itemType: "RDT",
     units: "kits",
-  });
+    lowStockThreshold: 20,
+  };
+  InventoryItemAPI.getById.mockResolvedValue(malariaRdt);
+  InventoryItemAPI.getAll.mockResolvedValue([malariaRdt]);
+  InventoryItemAPI.getLowStock.mockResolvedValue([]);
   InventoryItemAPI.getItemTypes.mockResolvedValue([
     "REAGENT",
     "RDT",
     "CARTRIDGE",
   ]);
+});
+
+describe("InventoryDashboard QC gate visibility", () => {
+  // A received lot defaults to QC PENDING and FEFO will not consume it, so the
+  // table has to say so rather than showing a reassuring "In Stock".
+  const pendingQcLot = { ...lotWithLocation, qcStatus: "PENDING" };
+
+  it("flags a QC-pending lot as Pending QC instead of In Stock", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([pendingQcLot]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    expect(within(table).getByText("Pending QC")).toBeInTheDocument();
+    expect(within(table).queryByText("In Stock")).not.toBeInTheDocument();
+  });
+
+  it("labels a QC-failed lot Failed QC rather than Pending QC", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([
+      { ...lotWithLocation, qcStatus: "FAILED" },
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    expect(within(table).getByText("Failed QC")).toBeInTheDocument();
+    expect(within(table).queryByText("Pending QC")).not.toBeInTheDocument();
+  });
+
+  it("labels a quarantined lot Quarantined rather than Pending QC", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([
+      { ...lotWithLocation, qcStatus: "QUARANTINED" },
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    // Once in the QC Status column, once in Stock Status.
+    expect(within(table).getAllByText("Quarantined")).toHaveLength(2);
+    expect(within(table).queryByText("Pending QC")).not.toBeInTheDocument();
+  });
+
+  it("labels a lot quarantined by status Quarantined though its QC is pending", async () => {
+    // What a lot received into quarantine looks like: the consume API calls this
+    // quarantined, so the dashboard must not call it Pending QC.
+    InventoryLotAPI.getAll.mockResolvedValue([
+      { ...lotWithLocation, status: "QUARANTINED", qcStatus: "PENDING" },
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    expect(within(table).getByText("Quarantined")).toBeInTheDocument();
+    expect(within(table).queryByText("Pending QC")).not.toBeInTheDocument();
+  });
+
+  it("shows each lot's QC status in its own column", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([lotWithLocation]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    expect(within(table).getByText("Passed")).toBeInTheDocument();
+  });
+
+  it("flags a QC-pending lot as Pending QC even when its item is low on stock", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([pendingQcLot]);
+    InventoryItemAPI.getLowStock.mockResolvedValue([
+      { id: "MALARIA_RDT", name: "Malaria RDT" },
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    expect(within(table).getByText("Pending QC")).toBeInTheDocument();
+    expect(within(table).queryByText("Low Stock")).not.toBeInTheDocument();
+  });
+});
+
+describe("InventoryDashboard status filter", () => {
+  it("filters the rows client-side and offers Disposed", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([
+      lotWithLocation,
+      { ...lotWithoutLocation, lotNumber: "LOT-GONE", status: "DISPOSED" },
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-GONE");
+    fireEvent.click(
+      document.querySelector("#inventory-dashboard-status-filter button"),
+    );
+    fireEvent.click(await screen.findByRole("option", { name: "Disposed" }));
+
+    const table = document.querySelector("table");
+    expect(within(table).getByText("LOT-GONE")).toBeInTheDocument();
+    expect(within(table).queryByText("LOT-100")).not.toBeInTheDocument();
+    // The controller ignores ?status=, so the filter must not refetch.
+    expect(InventoryLotAPI.getAll).toHaveBeenCalledTimes(1);
+    expect(InventoryLotAPI.getAll).toHaveBeenCalledWith();
+  });
+});
+
+describe("InventoryDashboard tab activation", () => {
+  it("refetches when it becomes the active tab again", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([lotWithLocation]);
+    const wrap = (active) => (
+      <IntlProvider locale="en" messages={messages}>
+        <NotificationContext.Provider value={mockNotificationContext}>
+          <InventoryDashboard active={active} />
+        </NotificationContext.Provider>
+      </IntlProvider>
+    );
+    const { rerender } = render(wrap(true));
+
+    await screen.findByText("LOT-100");
+    expect(InventoryLotAPI.getAll).toHaveBeenCalledTimes(1);
+
+    rerender(wrap(false));
+    rerender(wrap(true));
+
+    await waitFor(() =>
+      expect(InventoryLotAPI.getAll).toHaveBeenCalledTimes(2),
+    );
+  });
+});
+
+describe("InventoryDashboard low stock", () => {
+  // Regression: the tile and badge previously compared a lot's quantity to
+  // `item.minimumStockLevel`, a field that does not exist on InventoryItem, so
+  // the threshold was always 0 — the tile read 0 and the badge never rendered.
+  it("reports the low-stock count from the backend, not a local recomputation", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([lotWithLocation]);
+    InventoryItemAPI.getLowStock.mockResolvedValue([
+      { id: "MALARIA_RDT", name: "Malaria RDT" },
+    ]);
+    renderDashboard();
+
+    await waitFor(() =>
+      expect(InventoryItemAPI.getLowStock).toHaveBeenCalled(),
+    );
+    const tile = document.querySelector(".metric-warning .metric-value");
+    await waitFor(() => expect(tile).toHaveTextContent("1"));
+  });
+
+  // Scope badge assertions to the table: the metric tile's own label is also
+  // "Low Stock", so an unscoped query matches it and passes either way.
+  it("badges a lot's row as Low Stock when its item is below threshold", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([lotWithLocation]);
+    InventoryItemAPI.getLowStock.mockResolvedValue([
+      { id: "MALARIA_RDT", name: "Malaria RDT" },
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    await waitFor(() =>
+      expect(within(table).getByText("Low Stock")).toBeInTheDocument(),
+    );
+  });
+
+  it("shows no low-stock badge when the backend reports nothing low", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([lotWithLocation]);
+    InventoryItemAPI.getLowStock.mockResolvedValue([]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    const table = document.querySelector("table");
+    expect(within(table).queryByText("Low Stock")).not.toBeInTheDocument();
+  });
+
+  it("loads items in one batched call rather than one request per lot", async () => {
+    InventoryLotAPI.getAll.mockResolvedValue([
+      lotWithLocation,
+      lotWithoutLocation,
+    ]);
+    renderDashboard();
+
+    await screen.findByText("LOT-100");
+    expect(InventoryItemAPI.getAll).toHaveBeenCalledTimes(1);
+    expect(InventoryItemAPI.getById).not.toHaveBeenCalled();
+  });
 });
 
 describe("InventoryDashboard type filter", () => {
@@ -121,7 +310,9 @@ describe("InventoryDashboard type filter", () => {
       expect(InventoryItemAPI.getItemTypes).toHaveBeenCalled();
     });
 
-    fireEvent.click(document.querySelector("#type-filter button"));
+    fireEvent.click(
+      document.querySelector("#inventory-dashboard-type-filter button"),
+    );
     expect(await screen.findByText("Analyzer Cartridge")).toBeInTheDocument();
   });
 });
@@ -196,6 +387,7 @@ describe("InventoryDashboard Location column", () => {
           inventoryLotId: "1",
           locationId: "9",
           locationType: "room",
+          reason: "Consolidating stock",
         }),
       );
     });
