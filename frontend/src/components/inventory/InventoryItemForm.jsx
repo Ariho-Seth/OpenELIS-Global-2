@@ -12,6 +12,14 @@ import { NotificationContext } from "../layout/Layout";
 import { NotificationKinds } from "../common/CustomNotification";
 import { InventoryItemAPI } from "./InventoryService";
 
+// Same rule as the server's CodeGenerator.toCode; it does not truncate, the
+// server does, so a code that grows on upper-casing (e.g. ß to SS) is cut there.
+const toCode = (value) =>
+  value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
 const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
   const intl = useIntl();
   const { notificationVisible, setNotificationVisible, addNotification } =
@@ -31,6 +39,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
 
   // Form state
   const [formData, setFormData] = useState({
+    code: "",
     name: "",
     itemType: "REAGENT",
     category: "",
@@ -44,6 +53,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
   });
 
   const [saving, setSaving] = useState(false);
+  const normalizedCode = toCode(formData.code);
   const [error, setError] = useState(null);
   const [itemTypes, setItemTypes] = useState([]);
 
@@ -84,6 +94,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
   useEffect(() => {
     if (item) {
       setFormData({
+        code: item.code || "",
         name: item.name || "",
         itemType: item.itemType || "REAGENT",
         category: item.category || "",
@@ -98,6 +109,7 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
     } else {
       // Reset to initial state when adding new item
       setFormData({
+        code: "",
         name: "",
         itemType: "REAGENT",
         category: "",
@@ -206,13 +218,19 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
       if (isEdit) {
         await InventoryItemAPI.update(item.id, sanitizedData);
       } else {
+        // Never sent on update: lot numbers embed it (generateLotNumber).
+        sanitizedData.code = toCode(formData.code) || null;
         await InventoryItemAPI.create(sanitizedData);
       }
       setSaving(false);
       onSave();
     } catch (err) {
       console.error("Error saving item:", err);
-      const errorMessage = err.message || "Error saving catalog item";
+      // errorCode is an en.json id; message is the raw backend string.
+      const errorMessage = err.errorCode
+        ? intl.formatMessage({ id: err.errorCode }, err.params)
+        : err.message ||
+          intl.formatMessage({ id: "catalog.item.error.saveGeneric" });
       setError(errorMessage);
       setSaving(false);
       notify({
@@ -249,6 +267,46 @@ const InventoryItemForm = ({ open, onClose, onSave, item = null }) => {
           value={formData.name}
           onChange={(e) => handleChange("name", e.target.value)}
           required
+        />
+
+        <TextInput
+          id="code"
+          labelText={
+            <FormattedMessage id="catalog.item.code" defaultMessage="Code" />
+          }
+          value={formData.code}
+          disabled={isEdit}
+          placeholder={
+            isEdit
+              ? ""
+              : intl.formatMessage({
+                  id: "catalog.item.code.placeholder",
+                  defaultMessage: "Leave blank to auto-generate from name",
+                })
+          }
+          helperText={
+            isEdit
+              ? intl.formatMessage({
+                  id: "catalog.item.code.locked",
+                  defaultMessage:
+                    "Code is locked once saved so integrations and existing references keep working.",
+                })
+              : normalizedCode && normalizedCode !== formData.code
+                ? intl.formatMessage(
+                    {
+                      id: "catalog.item.code.preview",
+                      defaultMessage: "Will be saved as {code}",
+                    },
+                    { code: normalizedCode },
+                  )
+                : intl.formatMessage({
+                    id: "catalog.item.code.hint",
+                    defaultMessage:
+                      "Stable identifier used by integrations. Leave blank and we'll generate one from the name.",
+                  })
+          }
+          maxLength={64}
+          onChange={(e) => handleChange("code", e.target.value)}
         />
 
         <Dropdown
