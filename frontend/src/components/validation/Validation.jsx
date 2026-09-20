@@ -38,6 +38,9 @@ import {
   triageRows,
 } from "./validationTriage";
 import ValidationReviewPanel from "./ValidationReviewPanel";
+import { flagFor } from "./validationReview";
+import { FlagChip, accentClass } from "../resultPage/unified/flags";
+import "../resultPage/unified/unified-results.scss";
 
 const Validation = (props) => {
   const componentMounted = useRef(false);
@@ -197,8 +200,22 @@ const Validation = (props) => {
   ];
 
   /**
+   * Re-runs the search behind the queue. The row state cleared here belongs to
+   * the rows that were just acted on: paging over a queue that has shrunk,
+   * panels opened on rows that may be gone, and an acknowledgment scoped to the
+   * batch that has now been released.
+   */
+  const refreshQueue = () => {
+    setPage(1);
+    setExpandedRowIds([]);
+    setQcAckChecked(false);
+    setQcJustification("");
+    props.refreshResults?.();
+  };
+
+  /**
    * OGC-1030 (FR-J1) — another validator acted on the row since this page
-   * loaded: say who and when, then reload so nobody works from a stale queue.
+   * loaded: say who and when, then refresh so nobody works from a stale queue.
    */
   const handleStale = (response) => {
     addNotification({
@@ -213,12 +230,12 @@ const Validation = (props) => {
       ),
     });
     setNotificationVisible(true);
-    window.location.assign("/validation" + props.params);
+    refreshQueue();
   };
 
   /**
    * OGC-1028 — a per-row action (release / modify / retest / reject) succeeded:
-   * reload the queue so the row's new state is served fresh.
+   * refresh the queue so the row's new state is served fresh.
    */
   const handleRowActionDone = (outcome) => {
     addNotification({
@@ -229,7 +246,7 @@ const Validation = (props) => {
       }),
     });
     setNotificationVisible(true);
-    window.location.assign("/validation" + props.params);
+    refreshQueue();
   };
 
   /**
@@ -372,7 +389,7 @@ const Validation = (props) => {
         });
         setNotificationVisible(true);
         setBulkOpen(false);
-        window.location.assign("/validation" + props.params);
+        refreshQueue();
       },
     );
   };
@@ -613,12 +630,21 @@ const Validation = (props) => {
                 }
               </div>
             );
-          default:
+          default: {
+            // OGC-1121: the row itself says whether the value is abnormal or
+            // critical, not just the expanded review panel.
+            const flag = flagFor(row, triageByRowId.get(row.id)?.signals);
             return (
-              <div style={{ padding: "2px", ...holdingStyle }}>
+              <div
+                className={accentClass(flag)}
+                style={{ padding: "2px", ...holdingStyle }}
+                data-testid={`validation-result-${row.id}`}
+              >
                 {row.result}
+                <FlagChip flag={flag === "NORMAL" ? undefined : flag} />
               </div>
             );
+          }
         }
       }
 
