@@ -13,18 +13,7 @@ import { Admin } from "./components";
 import ChangePassword from "./components/ChangePassword";
 import Home from "./components/Home";
 import Layout from "./components/layout/Layout";
-import StorageDashboard from "./components/storage/StorageDashboard";
-import SampleItemsPage from "./components/storage/pages/SampleItemsPage";
-import ManageLocationPage from "./components/storage/pages/ManageLocationPage";
-import RoomsPage from "./components/storage/pages/RoomsPage";
-import DevicesPage from "./components/storage/pages/DevicesPage";
-import ShelvesPage from "./components/storage/pages/ShelvesPage";
-import RacksPage from "./components/storage/pages/RacksPage";
-import BoxesPage from "./components/storage/pages/BoxesPage";
-import EditLocationPage from "./components/storage/pages/EditLocationPage";
-import EditBoxPage from "./components/storage/pages/EditBoxPage";
-import AddLocationPage from "./components/storage/pages/AddLocationPage";
-import AddBoxPage from "./components/storage/pages/AddBoxPage";
+import StorageManagementPage from "./components/storage/StorageManagementPage";
 import AlertsDashboard from "./components/alerts/AlertsDashboard";
 import EQAProgramManagement from "./components/eqa/EQAProgram/ProgramManagement";
 import EQADistributionDashboard from "./components/eqa/EQADistributionDashboard";
@@ -89,6 +78,15 @@ const AnalyzerTypesPage = lazyWithRetry(
 const AnalyzerTypeMappingPage = lazyWithRetry(
   () => import("./pages/AnalyzerTypeMappingPage"),
 );
+const MicrobiologyPage = lazyWithRetry(
+  () => import("./pages/MicrobiologyPage"),
+);
+const MicrobiologyWorklistPage = lazyWithRetry(
+  () => import("./pages/MicrobiologyWorklistPage"),
+);
+const MicrobiologyWhonetPage = lazyWithRetry(
+  () => import("./pages/MicrobiologyWhonetPage"),
+);
 import {
   QCDashboard,
   ControlChartDetail,
@@ -105,6 +103,15 @@ import {
 import { getFromOpenElisServer } from "./components/utils/Utils";
 import { loadAndApplyBranding } from "./components/utils/BrandingUtils";
 import { resolveMessagesForLocale } from "./languages";
+import {
+  getMicrobiologyCaseUrl,
+  getMicrobiologyWorklistUrl,
+  MICROBIOLOGY_CASE_PATH,
+  MICROBIOLOGY_WORKLIST_PATH,
+  parseMicrobiologyCaseSearch,
+  parseMicrobiologyWorklistSearch,
+} from "./components/microbiology/MicrobiologyRoutes";
+import { MICROBIOLOGY_WHONET_PATH } from "./components/microbiology/WhonetRoutes";
 import config from "./config.json";
 import { SecureRoute } from "./components/security";
 import "./index.scss";
@@ -189,6 +196,11 @@ import {
   VectorIdentificationWorklist,
   VectorDeconvolutionWorklist,
 } from "./components/vectorIdentification";
+
+export const ANALYZER_RESULTS_ROLES = [
+  Roles.GLOBAL_ADMIN,
+  Roles.ANALYSER_IMPORT,
+];
 
 export default function App() {
   // The stored preference, or the browser's full tag (region kept: fr-MG
@@ -390,6 +402,11 @@ export default function App() {
     messageKey: "errorBoundary.route.samplePatientEntry.message",
   };
 
+  const routeErrorOrderEntry = {
+    titleKey: "errorBoundary.route.orderEntry.title",
+    messageKey: "errorBoundary.route.orderEntry.message",
+  };
+
   const routeErrorAnalyzers = {
     titleKey: "errorBoundary.route.analyzers.title",
     messageKey: "errorBoundary.route.analyzers.message",
@@ -546,6 +563,59 @@ export default function App() {
                   labUnitRole={{ Cytology: [Roles.RESULTS] }}
                 />
                 <SecureRoute
+                  path={`${MICROBIOLOGY_CASE_PATH}/:caseId`}
+                  exact
+                  component={() => (
+                    <Suspense fallback={null}>
+                      <MicrobiologyPage />
+                    </Suspense>
+                  )}
+                  role={[Roles.GLOBAL_ADMIN, Roles.RESULTS, Roles.VALIDATION]}
+                />
+                <SecureRoute
+                  path={MICROBIOLOGY_WORKLIST_PATH}
+                  exact
+                  component={() => (
+                    <Suspense fallback={null}>
+                      <MicrobiologyWorklistPage />
+                    </Suspense>
+                  )}
+                  role={[Roles.GLOBAL_ADMIN, Roles.RESULTS, Roles.VALIDATION]}
+                />
+                <SecureRoute
+                  path={MICROBIOLOGY_WHONET_PATH}
+                  exact
+                  component={() => (
+                    <Suspense fallback={null}>
+                      <MicrobiologyWhonetPage />
+                    </Suspense>
+                  )}
+                  role={[Roles.GLOBAL_ADMIN, Roles.RESULTS, Roles.REPORTS]}
+                />
+                <Route
+                  path="/MicrobiologyCaseView/:caseId"
+                  exact
+                  render={({ location, match }) => (
+                    <Redirect
+                      to={getMicrobiologyCaseUrl(
+                        match.params.caseId,
+                        parseMicrobiologyCaseSearch(location.search),
+                      )}
+                    />
+                  )}
+                />
+                <Route
+                  path="/MicrobiologyWorklist"
+                  exact
+                  render={({ location }) => (
+                    <Redirect
+                      to={getMicrobiologyWorklistUrl(
+                        parseMicrobiologyWorklistSearch(location.search),
+                      )}
+                    />
+                  )}
+                />
+                <SecureRoute
                   path="/GenericSample/Order"
                   exact
                   render={() => (
@@ -610,7 +680,11 @@ export default function App() {
                         <SecureRoute
                           path={`${match.path}/enter`}
                           exact
-                          render={() => <ClinicalOrderEnter />}
+                          render={() => (
+                            <RouteErrorBoundary {...routeErrorOrderEntry}>
+                              <ClinicalOrderEnter />
+                            </RouteErrorBoundary>
+                          )}
                           role={Roles.RECEPTION}
                         />
                         <SecureRoute
@@ -650,7 +724,11 @@ export default function App() {
                         <SecureRoute
                           path={`${match.path}/enter`}
                           exact
-                          render={() => <EnvironmentalOrderEnter />}
+                          render={() => (
+                            <RouteErrorBoundary {...routeErrorOrderEntry}>
+                              <EnvironmentalOrderEnter />
+                            </RouteErrorBoundary>
+                          )}
                           role={Roles.RECEPTION}
                         />
                         <SecureRoute
@@ -684,7 +762,11 @@ export default function App() {
                         <SecureRoute
                           path={`${match.path}/enter`}
                           exact
-                          render={() => <VectorOrderEnter />}
+                          render={() => (
+                            <RouteErrorBoundary {...routeErrorOrderEntry}>
+                              <VectorOrderEnter />
+                            </RouteErrorBoundary>
+                          )}
                           role={Roles.RECEPTION}
                         />
                         <SecureRoute
@@ -852,180 +934,22 @@ export default function App() {
                   exact
                   render={() => (
                     <RouteErrorBoundary {...routeErrorStorage}>
-                      <StorageDashboard />
+                      <StorageManagementPage />
                     </RouteErrorBoundary>
                   )}
                   role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
                 />
+                {/* Every per-resource URL resolves to the same tabbed page, so
+                    existing bookmarks and menu rows keep working. */}
                 <SecureRoute
-                  path="/Storage/sample-items"
+                  path="/Storage/:resource(sample-items|inventory-lots|rooms|devices|shelves|racks|boxes)"
                   exact
                   render={() => (
                     <RouteErrorBoundary {...routeErrorStorage}>
-                      <SampleItemsPage />
+                      <StorageManagementPage />
                     </RouteErrorBoundary>
                   )}
                   role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/sample-items/:id/manage-location"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <ManageLocationPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/rooms"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <RoomsPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/devices"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <DevicesPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/shelves"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <ShelvesPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/racks"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <RacksPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/boxes"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <BoxesPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.RECEPTION, Roles.RESULTS, Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/rooms/new"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <AddLocationPage type="room" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/devices/new"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <AddLocationPage type="device" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/shelves/new"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <AddLocationPage type="shelf" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/racks/new"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <AddLocationPage type="rack" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/boxes/new"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <AddBoxPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/rooms/:id/edit"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <EditLocationPage type="room" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/devices/:id/edit"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <EditLocationPage type="device" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/shelves/:id/edit"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <EditLocationPage type="shelf" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/racks/:id/edit"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <EditLocationPage type="rack" />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
-                />
-                <SecureRoute
-                  path="/Storage/boxes/:id/edit"
-                  exact
-                  render={() => (
-                    <RouteErrorBoundary {...routeErrorStorage}>
-                      <EditBoxPage />
-                    </RouteErrorBoundary>
-                  )}
-                  role={[Roles.GLOBAL_ADMIN]}
                 />
                 <SecureRoute
                   path="/inventory"
@@ -1450,34 +1374,45 @@ export default function App() {
                   render={() => <ManualEntryHelper />}
                   role={Roles.REPORTS}
                 />
+                {/* Every validation submenu renders the same component, and
+                    SearchForm picks its mode from window.location.pathname. The
+                    router reuses the mounted instance across these paths, so
+                    without a per-path key the mode effect never re-runs and the
+                    page keeps showing the previous submenu while the URL
+                    changes. The key forces a remount, which is what a fresh load
+                    does and what resets the search state between submenus. */}
                 <SecureRoute
                   path="/validation"
                   exact
-                  render={() => <StudyValidation />}
+                  render={() => <StudyValidation key="validation" />}
                   role={Roles.VALIDATION}
                 />
                 <SecureRoute
                   path="/ResultValidation"
                   exact
-                  render={() => <StudyValidation />}
+                  render={() => <StudyValidation key="ResultValidation" />}
                   role={Roles.VALIDATION}
                 />
                 <SecureRoute
                   path="/AccessionValidation"
                   exact
-                  render={() => <StudyValidation />}
+                  render={() => <StudyValidation key="AccessionValidation" />}
                   role={Roles.VALIDATION}
                 />
                 <SecureRoute
                   path="/AccessionValidationRange"
                   exact
-                  render={() => <StudyValidation />}
+                  render={() => (
+                    <StudyValidation key="AccessionValidationRange" />
+                  )}
                   role={Roles.VALIDATION}
                 />
                 <SecureRoute
                   path="/ResultValidationByTestDate"
                   exact
-                  render={() => <StudyValidation />}
+                  render={() => (
+                    <StudyValidation key="ResultValidationByTestDate" />
+                  )}
                   role={Roles.VALIDATION}
                 />
                 <SecureRoute
@@ -1490,7 +1425,7 @@ export default function App() {
                       </Suspense>
                     </RouteErrorBoundary>
                   )}
-                  role={Roles.ANALYSER_IMPORT}
+                  role={ANALYZER_RESULTS_ROLES}
                 />
                 <Route path="*" render={() => <RedirectOldUI />} />
               </Switch>
