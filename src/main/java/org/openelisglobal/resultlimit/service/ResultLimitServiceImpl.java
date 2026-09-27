@@ -221,7 +221,9 @@ public class ResultLimitServiceImpl extends AuditableBaseObjectServiceImpl<Resul
      * coverage check assumes; selecting from the override rows alone left them with
      * no range at all. Without a specimen in context, shared rows are preferred so
      * an override for one specimen never leaks into another's evaluation. The full
-     * pool is the last resort (legacy data where every row predates scoping).
+     * pool is the last resort only without a specimen in context (legacy data where
+     * every row predates scoping); with one, a specimen that has neither its own
+     * nor a shared range has none, rather than borrowing another specimen's.
      */
     private ResultLimit selectWithSpecimenPrecedence(List<ResultLimit> pool, String sampleTypeId, Patient patient) {
         if (pool == null || pool.isEmpty()) {
@@ -241,6 +243,9 @@ public class ResultLimitServiceImpl extends AuditableBaseObjectServiceImpl<Resul
             if (override != null && !GenericValidator.isBlankOrNull(override.getId()) || shared.isEmpty()) {
                 return override;
             }
+        }
+        if (shared.isEmpty() && sampleTypeId != null) {
+            return null;
         }
         return selectForPatient(shared.isEmpty() ? new ArrayList<>(pool) : shared, patient);
     }
@@ -399,15 +404,41 @@ public class ResultLimitServiceImpl extends AuditableBaseObjectServiceImpl<Resul
         }
 
         if (high == Float.POSITIVE_INFINITY) {
-            return "> " + StringUtil.doubleWithSignificantDigits(low, significantDigits);
+            return "> " + StringUtil.doubleWithSignificantDigits(low, rangeDigits(significantDigits, low));
         }
 
         if (low == Float.NEGATIVE_INFINITY) {
-            return "< " + StringUtil.doubleWithSignificantDigits(high, significantDigits);
+            return "< " + StringUtil.doubleWithSignificantDigits(high, rangeDigits(significantDigits, high));
         }
 
-        return StringUtil.doubleWithSignificantDigits(low, significantDigits) + separator
-                + StringUtil.doubleWithSignificantDigits(high, significantDigits);
+        String digits = rangeDigits(significantDigits, low, high);
+        return StringUtil.doubleWithSignificantDigits(low, digits) + separator
+                + StringUtil.doubleWithSignificantDigits(high, digits);
+    }
+
+    /**
+     * The test's decimal places, widened to what the limits themselves need, so a
+     * range of 0.7 to 1.1 on a test set to whole numbers reads 0.7 - 1.1 rather
+     * than 1 - 1. At most four places are added for a limit stored inexactly.
+     */
+    static String rangeDigits(String significantDigits, double... limits) {
+        if (GenericValidator.isBlankOrNull(significantDigits) || significantDigits.equals("-1")) {
+            return significantDigits;
+        }
+        int digits;
+        try {
+            digits = Integer.parseInt(significantDigits.trim());
+        } catch (NumberFormatException e) {
+            return significantDigits;
+        }
+        for (double limit : limits) {
+            if (Double.isInfinite(limit) || Double.isNaN(limit)) {
+                continue;
+            }
+            int needed = Math.max(0, new java.math.BigDecimal(Double.toString(limit)).stripTrailingZeros().scale());
+            digits = Math.max(digits, Math.min(needed, 4));
+        }
+        return String.valueOf(digits);
     }
 
     @Override
