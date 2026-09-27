@@ -171,6 +171,10 @@ public class AnalysisItem implements Serializable {
     private List<IdValuePair> methods;
     private List<IdValuePair> referralOrganizations;
     private List<IdValuePair> referralReasons;
+    /**
+     * The test was sent to a reference laboratory; this result came back from it.
+     */
+    private boolean referredOut = false;
 
     private List<IdValuePair> dictionaryResults;
 
@@ -186,6 +190,14 @@ public class AnalysisItem implements Serializable {
     private boolean isChildReflex = false;
 
     private boolean nonconforming = false;
+
+    /**
+     * The QC-fail signal (OGC-1147): a control covering this analysis failed and
+     * the resulting non-conformity is still open. Distinct from
+     * {@link #nonconforming}, which is a sample-level QA event — this one is about
+     * the run's quality control.
+     */
+    private boolean qcHold = false;
 
     private String pastNotes;
 
@@ -681,6 +693,14 @@ public class AnalysisItem implements Serializable {
         this.referralReasons = referralReasons;
     }
 
+    public boolean isReferredOut() {
+        return referredOut;
+    }
+
+    public void setReferredOut(boolean referredOut) {
+        this.referredOut = referredOut;
+    }
+
     public void setAnalysisId(String analysisId) {
         this.analysisId = analysisId;
     }
@@ -799,6 +819,14 @@ public class AnalysisItem implements Serializable {
 
     public void setNonconforming(boolean nonconforming) {
         this.nonconforming = nonconforming;
+    }
+
+    public boolean isQcHold() {
+        return qcHold;
+    }
+
+    public void setQcHold(boolean qcHold) {
+        this.qcHold = qcHold;
     }
 
     public String getInnoliaResult() {
