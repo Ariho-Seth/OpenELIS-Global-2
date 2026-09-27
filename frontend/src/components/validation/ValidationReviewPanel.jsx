@@ -273,7 +273,12 @@ const ValidationReviewPanel = ({
             <span className="cds--label" style={LABEL_STYLE}>
               <FormattedMessage id="label.validation.review.result" />
             </span>
-            <strong>{displayResult(row)}</strong>
+            <strong
+              style={{ whiteSpace: "nowrap" }}
+              data-testid="review-result-value"
+            >
+              {displayResult(row)}
+            </strong>
             {unitsOnly(row.units) && <span> {unitsOnly(row.units)}</span>}{" "}
             <FlagChip flag={flag} />
           </div>
@@ -297,6 +302,17 @@ const ValidationReviewPanel = ({
             value={row.analyzerName || notRecorded}
             testId="review-analyzer"
           />
+          {/* Where the result was produced is part of reviewing it. */}
+          {row.referredOut && (
+            <div data-testid="review-referred-out">
+              <span className="cds--label" style={LABEL_STYLE}>
+                <FormattedMessage id="label.validation.review.performedAt" />
+              </span>
+              <Tag size="sm" type="cyan">
+                <FormattedMessage id="label.results.referredOut" />
+              </Tag>
+            </div>
+          )}
           <Field
             labelKey="label.validation.review.enteredBy"
             value={row.enteredBy || notRecorded}
